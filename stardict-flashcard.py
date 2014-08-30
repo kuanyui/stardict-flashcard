@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys, os, math, re, configparser
+import sys, os, math, re, configparser, subprocess
 from PyQt4 import QtCore, QtGui
 
 ROOT = os.path.expanduser('~/.stardict-flashcard/')
@@ -104,7 +104,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Layout
         self.word_label = QtGui.QLabel()
+        self.word_label.setAlignment(QtCore.Qt.AlignCenter)
         self.word_label.setStyleSheet("font-size:30px;")
+        
         self.description_browser = QtGui.QTextBrowser()
         central_widget = QtGui.QWidget()
         layout = QtGui.QVBoxLayout()
@@ -119,7 +121,31 @@ class MainWindow(QtGui.QMainWindow):
         self.wordList = self.io.wordList
         
         self.index = 0
-        self.word_label = self.wordList[self.index]
+        self.refresh()
+
+
+    def refresh(self):
+        self.word = self.wordList[self.index][0]
+        self.word_label.setText(self.word)
+        cmd = subprocess.Popen(['sdcv', self.word], stdout=subprocess.PIPE)
+        output = cmd.stdout.read()
+        output = output.decode('utf-8')
+        formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
+        formattedOut = re.sub(r'-->(.+)<br>\n-->(.+)<br>',
+                              r'''
+<h5 style='background-color:#184880; color:#88bbff; margin:0;'>\1</h5>
+<h3 style='background-color:#184880; color:#fff; margin:0;'>\2</h3>
+                              '''
+                              , formattedOut)
+        formattedOut = re.sub(r'', r'', formattedOut)
+        print(formattedOut)
+        self.description = formattedOut
+        self.showDescription()
+
+    def showDescription(self):
+        self.description_browser.setHtml(self.description)
+
+        
     def configWindow(self):
         self.config_window=ConfigWindow(self)
         self.config_window.show()
