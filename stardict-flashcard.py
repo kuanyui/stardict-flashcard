@@ -56,6 +56,7 @@ class FileIO():
 
         self.lineList = lineList     # lineList = ['噂\t2\n','納得\t0\n']
         self.writeListIntoFile()
+        self.readFileIntoList()
 
     def writeListIntoFile(self):
         with open(DICT_PATH, 'w') as file:
@@ -66,8 +67,9 @@ class FileIO():
         linePattern = self.linePattern
         self.wordList = []
         for x in self.lineList:
-            linePattern.search(x)
-            self.wordList.append((linePattern.group(1), linePattern.group(2)))
+            match = linePattern.search(x)
+            self.wordList.append((match.group(1), match.group(2)))
+        print(self.wordList)
 
     def formatListAndWriteIntoFile(self):
         self.lineList = []
@@ -100,6 +102,24 @@ class MainWindow(QtGui.QMainWindow):
         self._createMenus()
         self.setWindowTitle("Flashcard")
 
+        # Layout
+        self.word_label = QtGui.QLabel()
+        self.word_label.setStyleSheet("font-size:30px;")
+        self.description_browser = QtGui.QTextBrowser()
+        central_widget = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.word_label)
+        layout.addWidget(self.description_browser)
+
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
+        # Initilize word list
+        self.io.initializeFile()
+        self.wordList = self.io.wordList
+        
+        self.index = 0
+        self.word_label = self.wordList[self.index]
     def configWindow(self):
         self.config_window=ConfigWindow(self)
         self.config_window.show()
@@ -110,21 +130,25 @@ class MainWindow(QtGui.QMainWindow):
         print(filename)
         # self.io.importArchivedFile(filename)
     def _createActions(self):
-        self.configAct = QtGui.QAction("&Configuration", self,
-                                       shortcut = QtGui.QKeySequence.New,
-                                       statusTip = "Open configuration window.",
-                                       triggered = self.configWindow)
-        self.importArchivedFileAct = QtGui.QAction("&Import Archived File", self,
-                                                 shortcut = QtGui.QKeySequence.Open,
-                                                 statusTip = "Import archived file into dictionary list",
-                                                 triggered = self.importArchivedFile)
+        self.configAct = QtGui.QAction(
+            "&Configuration", self,
+            shortcut = QtGui.QKeySequence.New,
+            statusTip = "Open configuration window.",
+            triggered = self.configWindow
+        )
+        self.importArchivedFileAct = QtGui.QAction(
+            "&Import Archived File", self,
+            shortcut = QtGui.QKeySequence.Open,
+            statusTip = "Import archived file into dictionary list",
+            triggered = self.importArchivedFile
+        )
         
 
     def _createMenus(self):
         self.dict_menu = self.menuBar().addMenu("&File")
         self.dict_menu.addAction(self.importArchivedFileAct)
         self.dict_menu.addAction(self.configAct)
-
+        
 
 class ConfigWindow(QtGui.QDialog):
     def __init__(self, parent=None):
