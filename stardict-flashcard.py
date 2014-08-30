@@ -14,7 +14,7 @@ class ConfigFile():
             with open(CONFIG_PATH, 'w') as file:
                 file.write('''[Path]
 DictPath = ~/dic.txt
-CurrentArchiveFile = default-archive
+ArchiveFileName = default-archive
 
 [Main]
 MemorizedCount = 5
@@ -23,21 +23,21 @@ MemorizedCount = 5
         self.parser = configparser.ConfigParser()
         self.parser.optionxform = str # Preserve cases of keys.
         self.parser.read(CONFIG_PATH)
-        global DICT_PATH, ARCHIVE_FILE_PATH, MEMORIZED_COUNT
-        DICT_PATH            = os.path.expanduser(self.parser['Path']['DictPath'])
-        ARCHIVE_FILE_PATH = os.path.join(ARCHIVE_DIR,
-                                            self.parser['Path']['CurrentArchiveFile'])
-        MEMORIZED_COUNT      = int(self.parser['Main']['MemorizedCount'])
+        global DICT_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
+        DICT_PATH             = os.path.expanduser(self.parser['Path']['DictPath'])
+        ARCHIVE_FILE_NAME     = self.parser['Path']['ArchiveFileName']
+        ARCHIVE_FILE_FULLNAME = os.path.join(ARCHIVE_DIR, ARCHIVE_FILE_NAME)
+        MEMORIZED_COUNT       = int(self.parser['Main']['MemorizedCount'])
         
         # Archive
         if not os.path.isdir(ARCHIVE_DIR):
             os.makedirs(ARCHIVE_DIR)
-        if not os.path.exists(ARCHIVE_FILE_PATH):
-            open(ARCHIVE_FILE_PATH, 'a').close() # touch current archive file
+        if not os.path.exists(ARCHIVE_FILE_FULLNAME):
+            open(ARCHIVE_FILE_FULLNAME, 'a').close() # touch current archive file
 
     def writeConfigFile(self):
         self.parser['Path']['DictPath']           = DICT_PATH
-        self.parser['Path']['CurrentArchiveFile'] = ARCHIVE_FILE_PATH
+        self.parser['Path']['ArchiveFileName']    = ARCHIVE_FILE_NAME
         self.parser['Main']['MemorizedCount']     = str(MEMORIZED_COUNT)
         with open(CONFIG_PATH, 'w') as file:
             self.parser.write(file)
@@ -76,7 +76,7 @@ class FileIO():
         self.writeListIntoFile()
 
     def archiveWord(self, index):
-        with open(ARCHIVE_FILE_PATH, 'a') as file:
+        with open(ARCHIVE_FILE_FULLNAME, 'a') as file:
             file.write(self.wordList[index][0] + '\n')
         # Delete word from list (but not write list into file yet)
         del self.wordList[index]
@@ -136,7 +136,7 @@ class ConfigWindow(QtGui.QDialog):
         button_dict_path.clicked.connect(self.browseDictPath)
         
         self.line_archive_path = QtGui.QLineEdit()
-        self.line_archive_path.setText(ARCHIVE_FILE_PATH)
+        self.line_archive_path.setText(ARCHIVE_FILE_FULLNAME)
         button_archive_path = QtGui.QPushButton("Browse Archive...")
         button_archive_path.clicked.connect(self.browseArchivePath)
 
@@ -176,10 +176,11 @@ class ConfigWindow(QtGui.QDialog):
             self.line_archive_path.setText(path)
 
     def applyAndWriteConfigFile(self):
-        global DICT_PATH, ARCHIVE_FILE_PATH, MEMORIZED_COUNT
-        DICT_PATH            = str(self.line_dict_path.text())
-        ARCHIVE_FILE_PATH = str(self.line_archive_path.text())
-        MEMORIZED_COUNT      = int(self.spin_box.value())
+        global DICT_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
+        DICT_PATH             = str(self.line_dict_path.text())
+        ARCHIVE_FILE_FULLNAME = str(self.line_archive_path.text())
+        ARCHIVE_FILE_NAME     = os.path.basename(ARCHIVE_FILE_FULLNAME)
+        MEMORIZED_COUNT       = int(self.spin_box.value())
 
         self.parent.config.writeConfigFile()
         self.close()
