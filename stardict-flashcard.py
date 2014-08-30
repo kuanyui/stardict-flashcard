@@ -205,9 +205,9 @@ class ConfigWindow(QtGui.QDialog):
         layout.addWidget(QtGui.QLabel("Current archive file path:"), 1, 0)
         layout.addWidget(self.line_archive_path, 1, 1)
         layout.addWidget(button_archive_path, 1, 2)
-        layout.addWidget(QtGui.QLabel("Word count:"), 2, 0)
-        layout.addWidget(self.spin_box, 2, 1, 1, 3)
-        layout.addWidget(button_box, 3, 2, 1, 2)
+        layout.addWidget(QtGui.QLabel("Memorized count:"), 2, 0)
+        layout.addWidget(self.spin_box, 2, 1, 1, 1)
+        layout.addWidget(button_box, 3, 1, 1, 2)
 
         self.setLayout(layout)
         self.adjustSize()
