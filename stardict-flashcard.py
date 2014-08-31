@@ -18,6 +18,9 @@ ArchiveFileName = default-archive
 
 [Main]
 MemorizedCount = 5
+
+[Other]
+FirstTimeHelp = True
 ''')
         # Config
         self.parser = configparser.ConfigParser()
@@ -116,16 +119,22 @@ class MainWindow(QtGui.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+        self.resize(600, 400)
+        self.move(100, 100)
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
 
+        self.openHelpWindow()
+        
         # Initilize word list
         self.io.initializeFile()
         self.wordList = self.io.wordList
         
         self.index = 0
         self.refresh()
+        self.show()
+
 
     def refresh(self):
         if self.wordList[self.index][1] >= MEMORIZED_COUNT:
@@ -236,11 +245,14 @@ or import an archived file to start another reviewing.''')
         self.dict_menu = self.menuBar().addMenu("&File")
         self.dict_menu.addAction(self.importArchivedFileAct)
         self.dict_menu.addAction(self.configAct)
+
+    def openHelpWindow(self):
+        self.help_window = HelpWindow(self)
         
 
 class ConfigWindow(QtGui.QDialog):
     def __init__(self, parent=None):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
         self.line_dict_path = QtGui.QLineEdit()
         self.line_dict_path.setText(DICT_PATH)
@@ -296,12 +308,45 @@ class ConfigWindow(QtGui.QDialog):
 
         self.parent.config.writeConfigFile()
         self.close()
-    
+
+class HelpWindow(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        text_browser = QtGui.QTextBrowser()
+        text_browser.setStyleSheet("font-size:12px;")
+        text_browser.setHtml('''
+<h1>Welcome to <i>Stardict Flashcard</i>!</h1>
+You can add new word into flashcard within Stardict by <b>Alt+e</b>.<br>
+(The words will be added into <i>~/dic.txt</i> by default)<by>
+Then open <i>Stardict Flashcard</i>:
+<ol>
+<li>Press <b>Space</b> to display answer.</li>
+<li>Then press <b>Enter</b> means you can recite this word.</li>
+<li>Or if you can't think of the word and recite it, press <b>Space</b> to go on instead.</li>
+<li>After a word can be recited up to 5 times, the word will be archived into current archive file automatically.<li>
+</ol>
+       
+After finishing all words, you still can review them again by <b>importing archive file</b>.<br>
+You can manage archive file in <i>File/Manage Archive File</i>.
+''')
+        button = QtGui.QPushButton("&Ok")
+        button.clicked.connect(self.close)
+        button.setDefault(True)
+        button.setAutoDefault(True)
+        button_layout = QtGui.QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(button)
+        main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(text_browser)
+        main_layout.addLayout(button_layout)
+        self.setLayout(main_layout)
+        self.resize(600, 300)
+        self.show()
+        
         
 app = QtGui.QApplication(sys.argv)
 
 # t = FileIO().initializeFile()
 main_window = MainWindow()
-main_window.show()
 
 app.exec_()
