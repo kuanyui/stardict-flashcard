@@ -119,8 +119,14 @@ class MainWindow(QtGui.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-        self.resize(600, 400)
-        self.move(100, 100)
+        self.resize(600, 500)
+        
+        # Centering window
+        frame_geometry = self.frameGeometry()
+        desktop_center = QtGui.QDesktopWidget().availableGeometry().center()
+        frame_geometry.moveCenter(desktop_center)
+        self.move(frame_geometry.topLeft())
+        
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
