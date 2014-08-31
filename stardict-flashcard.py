@@ -68,8 +68,7 @@ class FileIO():
         self.wordList = []
         for x in self.lineList:
             match = linePattern.search(x)
-            self.wordList.append((match.group(1), match.group(2)))
-        print(self.wordList)
+            self.wordList.append((match.group(1), int(match.group(2))))
 
     def formatListAndWriteIntoFile(self):
         self.lineList = []
@@ -80,7 +79,7 @@ class FileIO():
     def archiveWord(self, index):
         with open(ARCHIVE_FILE_FULLNAME, 'a') as file:
             file.write(self.wordList[index][0] + '\n')
-        # Delete word from list (but not write list into file yet)
+        # Delete word from list (but not write list into dict file yet)
         del self.wordList[index]
 
     def importArchivedFile(self, archiveFilePath):
@@ -108,6 +107,7 @@ class MainWindow(QtGui.QMainWindow):
         self.word_label.setStyleSheet("font-size:30px;")
         
         self.description_browser = QtGui.QTextBrowser()
+        self.description_browser.setStyleSheet("font-size:12pt;")
         central_widget = QtGui.QWidget()
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.word_label)
@@ -116,6 +116,10 @@ class MainWindow(QtGui.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+        # Key Binding
+        QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
+        QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
+
         # Initilize word list
         self.io.initializeFile()
         self.wordList = self.io.wordList
@@ -123,30 +127,88 @@ class MainWindow(QtGui.QMainWindow):
         self.index = 0
         self.refresh()
 
-
     def refresh(self):
-        self.word = self.wordList[self.index][0]
-        self.word_label.setText(self.word)
-        cmd = subprocess.Popen(['sdcv', self.word], stdout=subprocess.PIPE)
-        output = cmd.stdout.read()
-        output = output.decode('utf-8')
-        formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
-        formattedOut = re.sub(r'-->(.+)<br>\n-->(.+)<br>',
-                              r'''
+        if self.wordList[self.index][1] >= MEMORIZED_COUNT:
+            self.archiveCurrentWord()
+        else:
+            self.word = self.wordList[self.index][0]
+            self.word_label.setText(self.word)
+            cmd = subprocess.Popen(['sdcv', self.word], stdout=subprocess.PIPE)
+            output = cmd.stdout.read()
+            output = output.decode('utf-8')
+            formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
+            formattedOut = re.sub(r'-->(.+)<br>\n-->(.+)<br>',
+                                  r'''
 <h5 style='background-color:#184880; color:#88bbff; margin:0;'>\1</h5>
 <h3 style='background-color:#184880; color:#fff; margin:0;'>\2</h3>
-                              '''
-                              , formattedOut)
-        formattedOut = re.sub(r'', r'', formattedOut)
-        print(formattedOut)
-        self.description = formattedOut
-        self.showDescription()
+                                  '''
+                                  , formattedOut)
+            # print(formattedOut)
+            self.formattedOut = formattedOut
+            self.description_browser.setText("")
+            self.now = 'unanswered'
 
     def showDescription(self):
-        self.description_browser.setHtml(self.description)
+        self.description_browser.setHtml(self.formattedOut)
+        self.now = 'answered'
 
+    def allWordsFinished(self):
+        self.word_label.setText("Cleared!")
+        self.description_browser.setText('''No word remains in dict file now.
+Now you can add new word via StarDict (Alt + e),
+or import an archived file to start another reviewing.''')
         
-    def configWindow(self):
+    def correctIndex(self):
+        '''If no word remains in wordList, call allWordsFinished().
+        If index is out of list, set it to 0.
+        Finally, refresh()'''
+        if len(self.wordList) == 0:
+            self.allWordsFinished()
+        else:
+            if self.index >= len(self.wordList):
+                self.index = 0
+            self.refresh()
+
+    def archiveCurrentWord(self):
+        self.io.archiveWord(self.index)
+        self.correctIndex()
+        
+    def incfIndex(self):
+        '''next word, but without +1 count num'''
+        self.index += 1
+        self.correctIndex()
+
+    def bingo(self):
+        if self.now == 'unanswered':
+            None
+        else:
+            self.wordList[self.index] = (self.wordList[self.index][0],
+                                         self.wordList[self.index][1] + 1)
+            if self.wordList[self.index][1] >= MEMORIZED_COUNT:
+                self.archiveCurrentWord()
+            else:
+                self.incfIndex()
+            self.io.formatListAndWriteIntoFile()
+
+    def goOn(self):
+        '''After press space, decide to bingo() or just incfIndex()'''
+        if self.now == 'unanswered':
+            self.showDescription()
+        elif self.now == 'answered':
+            self.incfIndex()
+         
+
+    def closeEvent(self, event):
+        reply = QtGui.QMessageBox.question(self, 'Message',
+            "Are you sure to quit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.Yes:
+            self.io.formatListAndWriteIntoFile()
+            event.accept()
+        else:
+            event.ignore()
+        
+    def openConfigWindow(self):
         self.config_window=ConfigWindow(self)
         self.config_window.show()
 
@@ -160,7 +222,7 @@ class MainWindow(QtGui.QMainWindow):
             "&Configuration", self,
             shortcut = QtGui.QKeySequence.New,
             statusTip = "Open configuration window.",
-            triggered = self.configWindow
+            triggered = self.openConfigWindow
         )
         self.importArchivedFileAct = QtGui.QAction(
             "&Import Archived File", self,
