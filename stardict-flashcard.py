@@ -122,10 +122,7 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(600, 500)
         
         # Centering window
-        frame_geometry = self.frameGeometry()
-        desktop_center = QtGui.QDesktopWidget().availableGeometry().center()
-        frame_geometry.moveCenter(desktop_center)
-        self.move(frame_geometry.topLeft())
+        self.move(QtGui.QDesktopWidget().availableGeometry().center() - self.frameGeometry().center())
         
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
