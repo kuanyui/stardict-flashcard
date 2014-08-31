@@ -339,16 +339,20 @@ You can manage archive file in <i>File/Manage Archive File</i>.
         button.clicked.connect(self.close)
         button.setDefault(True)
         button.setAutoDefault(True)
-        button_layout = QtGui.QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(button)
+        button_box = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
+        button_box.accepted.connect(self.close)
+
         main_layout = QtGui.QVBoxLayout()
         main_layout.addWidget(text_browser)
-        main_layout.addLayout(button_layout)
+        main_layout.addWidget(button_box)
+
         self.setLayout(main_layout)
         self.resize(600, 300)
+        self.setWindowModality(QtCore.Qt.WindowModal)
+        
         self.show()
         
+
         
 app = QtGui.QApplication(sys.argv)
 
