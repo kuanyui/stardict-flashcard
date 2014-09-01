@@ -6,11 +6,15 @@ ROOT = os.path.expanduser('~/.stardict-flashcard/')
 CONFIG_PATH = os.path.join(ROOT, 'rc.ini')
 ARCHIVE_DIR = os.path.join(ROOT, 'archive')
 
+OPEN_FIRST_TIME_HELP = False
+
 class ConfigFile():
     def __init__(self, parent=None):
         if not os.path.isdir(ROOT):
             os.makedirs(ROOT)
         if not os.path.isfile(CONFIG_PATH):
+            global OPEN_FIRST_TIME_HELP
+            OPEN_FIRST_TIME_HELP = True
             with open(CONFIG_PATH, 'w') as file:
                 file.write('''[Path]
 DictPath = ~/dic.txt
@@ -147,7 +151,8 @@ class MainWindow(QtGui.QMainWindow):
         self.index = 0
         self.refresh()
         self.show()
-
+        if OPEN_FIRST_TIME_HELP == True:
+            self.openHelpWindow()
 
     def refresh(self):
         if self.wordList[self.index][1] >= MEMORIZED_COUNT:
