@@ -56,6 +56,7 @@ class FileIO():
         self.linePattern=re.compile(r'([^\t]+)\t([0-9]+)\n')
 
     def initializeFile(self):
+        '''Read dict file'''
         with open(DICT_PATH, 'r') as file:
             lineList = file.readlines()
         # Check each line in dict file if count num exist. if not, add it.
@@ -90,17 +91,25 @@ class FileIO():
             file.write(self.wordList[index][0] + '\n')
         # Delete word from list (but not write list into dict file yet)
         del self.wordList[index]
+        self.writeListIntoFile()
 
-    def importArchivedFile(self, archiveFilePath):
-        with open(archiveFilePath, 'r') as file:
-            self.archive_content = file.read() # [FIXME] May I must to use self in here?
+    def importArchivedFile(self, archiveFilename):
+        with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'r') as archiveFile:
+            archive_content = archiveFile.read() # [FIXME] May I must to use self in here?
+        with open(DICT_PATH, 'a') as dictFile:
+            print(archive_content)
+            dictFile.write("test\n")
+        #self.initializeFile()
 
-        with open(DICT_PATH, 'a') as file:
-            file.write(self.archive_content)
-
-        self.archive_content = ''
-        self.initializeFile()
-
+    def archiveWholeDict(self, archiveFilename):
+        with open(DICT_PATH, 'r') as file:
+            wholeDictContent = file.read()
+        with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'a') as file:
+            file.write(wholeDictContent)
+        # Clear dict file.
+        self.wordList = []
+        self.writeListIntoFile()
+        
     def editWithSystemEditor(self, filePath):
         editor = os.getenv('EDITOR')
         if editor == '':
@@ -113,7 +122,6 @@ class FileIO():
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
-        self.io = FileIO()
         self.config = ConfigFile()
         self.config.initializeGlobalVar()
         self._createActions()
@@ -145,6 +153,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
         
         # Initilize word list
+        self.io = FileIO()
         self.io.initializeFile()
         self.wordList = self.io.wordList
         
@@ -155,6 +164,8 @@ class MainWindow(QtGui.QMainWindow):
             self.openHelpWindow()
 
     def refresh(self):
+        if len(self.wordList) == 0:
+            return None         # jump out of function
         if self.wordList[self.index][1] >= MEMORIZED_COUNT:
             self.archiveCurrentWord()
         else:
@@ -236,6 +247,18 @@ or import an archived file to start another reviewing.''')
         #else:
         #    event.ignore()
 
+    def archiveDict(self):
+        '''Archive all words in dict.'''
+        filename, ok = QtGui.QInputDialog.getText(self,
+                                                    "Input archive file",
+                                                    "Please input a filename for archiving the dict:",
+                                                     QtGui.QLineEdit.Normal,
+                                                     "[dict]")
+        if ok and filename != '':
+            self.io.archiveWholeDict(filename)
+            self.openArchiveFileManager()
+        
+    
     # Windows
     def openConfigWindow(self):
         self.config_window=ConfigWindow(self)
@@ -248,11 +271,6 @@ or import an archived file to start another reviewing.''')
     def openHelpWindow(self):
         self.help_window = HelpWindow(self)
 
-    #    def importArchivedFile(self):
-    #        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-    #                                                     os.path.expanduser('~/stardict-flashcard/archive'))
-    #        print(filename)
-    #        self.io.importArchivedFile(filename)
     def _createActions(self):
         self.configAct = QtGui.QAction(
             "&Configuration", self,
@@ -261,7 +279,7 @@ or import an archived file to start another reviewing.''')
             triggered = self.openConfigWindow
         )
         self.openArchiveFileManagerAct = QtGui.QAction(
-            "&Archive Manager", self,
+            "&Manage", self,
             shortcut = QtGui.QKeySequence.Open,
             statusTip = "Create, import, rename, edit, delete archive file.",
             triggered = self.openArchiveFileManager
@@ -272,13 +290,21 @@ or import an archived file to start another reviewing.''')
             statusTip = "Open help window.",
             triggered = self.openHelpWindow
         )
+        self.archiveDictAct = QtGui.QAction(
+            "&Archive Whole Dict", self,
+            shortcut = QtGui.QKeySequence.Open,
+            statusTip = "Archive all words in dict, then you can import the other archive file.",
+            triggered = self.archiveDict
+        )
 
     def _createMenus(self):
-        self.archive_menu = self.menuBar().addMenu("&File")
-        self.archive_menu.addAction(self.openArchiveFileManagerAct)
-        self.archive_menu.addAction(self.configAct)
-        self.archive_menu = self.menuBar().addMenu("&Help")
-        self.archive_menu.addAction(self.openHelpWindowAct)
+        self.menu_bar = self.menuBar().addMenu("&File")
+        self.menu_bar.addAction(self.configAct)
+        self.menu_bar = self.menuBar().addMenu("&Archive")
+        self.menu_bar.addAction(self.openArchiveFileManagerAct)
+        self.menu_bar.addAction(self.archiveDictAct)
+        self.menu_bar = self.menuBar().addMenu("&Help")
+        self.menu_bar.addAction(self.openHelpWindowAct)
         
 
         
@@ -360,7 +386,7 @@ class ArchiveFileManager(QtGui.QDialog):
         new.clicked.connect(self.new)
         rename = QtGui.QPushButton("&Rename")
         rename.clicked.connect(self.rename)
-        edit = QtGui.QPushButton("&Open && Edit")
+        edit = QtGui.QPushButton("&Edit")
         edit.clicked.connect(self.edit)
         delete = QtGui.QPushButton("&Delete")
         delete.clicked.connect(self.delete)
@@ -392,6 +418,7 @@ class ArchiveFileManager(QtGui.QDialog):
         self.userInput = ""
 
     def reloadArchiveFiles(self):
+        global ARCHIVE_FILE_NAME
         self.tree.clear()
         itemList = []
         for fileName in os.listdir(ARCHIVE_DIR):
@@ -413,7 +440,6 @@ class ArchiveFileManager(QtGui.QDialog):
         if len(current_archive_item) > 0:
             current_archive_item[0].setData(0, 0, "\u2713")
         else:
-            global ARCHIVE_FILE_NAME
             first_item = self.tree.itemAt(0, 0)
             ARCHIVE_FILE_NAME = first_item.data(1, 0)
             first_item.setData(0, 0, "\u2713")
@@ -488,7 +514,7 @@ class ArchiveFileManager(QtGui.QDialog):
              QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             io = FileIO()
-            io.importArchivedFile(os.path.join(ARCHIVE_DIR, filename))
+            io.importArchivedFile(filename)
             msg = QtGui.QMessageBox()
             msg.setText("Done! {0} words imported.".format(words))
             msg.exec_()
@@ -499,7 +525,8 @@ class HelpWindow(QtGui.QDialog):
         super().__init__(parent)
         text_browser = QtGui.QTextBrowser()
         text_browser.setStyleSheet("font-size:12px;")
-        text_browser.setHtml('''
+        text_browser.setHtml(
+'''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
 You can add new word into flashcard via Stardict with <b style='background-color: #ddd; color: #333;'>Alt+e</b>.<br>
 (The words will be added into <i>~/dic.txt</i> by default)<by>
@@ -510,7 +537,7 @@ Then open <i>Stardict Flashcard</i>:
 <li>Or if you can't think of the word and recite it, press <b>Space</b> to go on instead.</li>
 <li>After a word can be recited up to 5 times, the word will be archived into current archive file automatically.<li>
 </ol>
-       
+
 After finishing all words, you still can review them again by <b>importing archive file</b>.<br>
 You can manage archive file in <i>File/Manage Archive File</i>.
 ''')
