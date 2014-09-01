@@ -127,8 +127,6 @@ class MainWindow(QtGui.QMainWindow):
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
-
-        self.openHelpWindow()
         
         # Initilize word list
         self.io.initializeFile()
@@ -211,24 +209,33 @@ or import an archived file to start another reviewing.''')
          
 
     def closeEvent(self, event):
-        reply = QtGui.QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        self.io.formatListAndWriteIntoFile()
+        #reply = QtGui.QMessageBox.question(self, 'Message',
+        #    "Are you sure to quit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.Yes:
-            self.io.formatListAndWriteIntoFile()
-            event.accept()
-        else:
-            event.ignore()
-        
+        #if reply == QtGui.QMessageBox.Yes:
+        #    self.io.formatListAndWriteIntoFile()
+        #    event.accept()
+        #else:
+        #    event.ignore()
+
+    # Windows
     def openConfigWindow(self):
         self.config_window=ConfigWindow(self)
         self.config_window.show()
 
-    def importArchivedFile(self):
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                     os.path.expanduser('~/stardict-flashcard/archive'))
-        print(filename)
-        # self.io.importArchivedFile(filename)
+    def openArchiveFileManager(self):
+        self.archive_file_manager = ArchiveFileManager()
+        self.archive_file_manager.show()
+
+    def openHelpWindow(self):
+        self.help_window = HelpWindow(self)
+
+    #    def importArchivedFile(self):
+    #        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+    #                                                     os.path.expanduser('~/stardict-flashcard/archive'))
+    #        print(filename)
+    #        self.io.importArchivedFile(filename)
     def _createActions(self):
         self.configAct = QtGui.QAction(
             "&Configuration", self,
@@ -236,21 +243,27 @@ or import an archived file to start another reviewing.''')
             statusTip = "Open configuration window.",
             triggered = self.openConfigWindow
         )
-        self.importArchivedFileAct = QtGui.QAction(
-            "&Import Archived File", self,
+        self.openArchiveFileManagerAct = QtGui.QAction(
+            "&Archive Manager", self,
             shortcut = QtGui.QKeySequence.Open,
-            statusTip = "Import archived file into dictionary list",
-            triggered = self.importArchivedFile
+            statusTip = "Create, import, rename, edit, delete archive file.",
+            triggered = self.openArchiveFileManager
         )
-        
+        self.openHelpWindowAct = QtGui.QAction(
+            "&Help", self,
+            shortcut = QtGui.QKeySequence.Open,
+            statusTip = "Open help window.",
+            triggered = self.openHelpWindow
+        )
 
     def _createMenus(self):
-        self.dict_menu = self.menuBar().addMenu("&File")
-        self.dict_menu.addAction(self.importArchivedFileAct)
-        self.dict_menu.addAction(self.configAct)
+        self.archive_menu = self.menuBar().addMenu("&File")
+        self.archive_menu.addAction(self.openArchiveFileManagerAct)
+        self.archive_menu.addAction(self.configAct)
+        self.archive_menu = self.menuBar().addMenu("&Help")
+        self.archive_menu.addAction(self.openHelpWindowAct)
+        
 
-    def openHelpWindow(self):
-        self.help_window = HelpWindow(self)
         
 
 class ConfigWindow(QtGui.QDialog):
@@ -312,6 +325,83 @@ class ConfigWindow(QtGui.QDialog):
         self.parent.config.writeConfigFile()
         self.close()
 
+class ArchiveFileManager(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.view = QtGui.QTreeView()
+
+        self.model = QtGui.QStandardItemModel(0, 2, parent)
+        self.model.setHeaderData(0, QtCore.Qt.Horizontal, 'Filename')
+        self.model.setHeaderData(1, QtCore.Qt.Horizontal, 'Words')
+
+        self.reloadArchiveFiles()
+        
+        self.view.setModel(self.model)
+        self.view.setColumnWidth(0, 300)
+        self.view.setColumnWidth(1, 24)           
+
+        # buttons
+        new = QtGui.QPushButton("&New")
+        rename = QtGui.QPushButton("&Rename")
+        edit = QtGui.QPushButton("&Open && Edit")
+        delete = QtGui.QPushButton("&Delete")
+        importtodict = QtGui.QPushButton("&Import to Dict")
+        close = QtGui.QPushButton("&Close")
+        close.clicked.connect(self.close)
+
+        button_layout = QtGui.QVBoxLayout()
+        button_layout.addWidget(new)
+        button_layout.addWidget(rename)
+        button_layout.addWidget(edit)
+        button_layout.addWidget(delete)
+        button_layout.addSpacing(16)
+        button_layout.addWidget(importtodict)
+        button_layout.addStretch()
+        button_layout.addWidget(close)
+
+        #layout
+        main_layout = QtGui.QHBoxLayout()
+        main_layout.addWidget(self.view)
+        main_layout.addLayout(button_layout)
+        self.setLayout(main_layout)
+        self.resize(500, 300)
+        # make main window uncontrollable.
+        self.setWindowModality(QtCore.Qt.WindowModal)
+
+    def reloadArchiveFiles(self):
+        index = 0
+        for file in os.listdir(ARCHIVE_DIR):
+            filePath = os.path.join(ARCHIVE_DIR, file)
+            wordsAmount = sum(1 for line in open(filePath))
+            item_filename = QtGui.QStandardItem(file)
+            item_wordsamount = QtGui.QStandardItem(str(wordsAmount))
+            self.model.setItem(index, 0, item_filename)
+            self.model.setItem(index, 1, item_wordsamount)
+            index += 1
+
+    def new(self):
+        filename, ok = QtGui.QInputDialog.getText(self,
+                                                  "Create a new archive",
+                                                  "Please input a name for new archive file :",
+                                                  QtGui.QLineEdit.Normal,
+                                                  "")
+        if ok and filename != '':
+            open(os.path.join(ARCHIVE_DIR, filename), 'a').close()
+            self.reloadArchiveFiles()
+
+    def rename(self): 
+        filename, ok = QtGui.QInputDialog.getText(self,
+                                                  "Rename the archive file",
+                                                  "Please input a new name for this archive file :",
+                                                  QtGui.QLineEdit.Normal,
+                                                  "")
+#            if ok and filename != '':
+#                if filename in 
+#                os.rename()
+                
+
+
+
 class HelpWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -319,7 +409,7 @@ class HelpWindow(QtGui.QDialog):
         text_browser.setStyleSheet("font-size:12px;")
         text_browser.setHtml('''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
-You can add new word into flashcard within Stardict by <b>Alt+e</b>.<br>
+You can add new word into flashcard via Stardict with <b style='background-color: #ddd; color: #333;'>Alt+e</b>.<br>
 (The words will be added into <i>~/dic.txt</i> by default)<by>
 Then open <i>Stardict Flashcard</i>:
 <ol>
@@ -345,6 +435,7 @@ You can manage archive file in <i>File/Manage Archive File</i>.
 
         self.setLayout(main_layout)
         self.resize(600, 300)
+        # make main window uncontrollable.
         self.setWindowModality(QtCore.Qt.WindowModal)
         
         self.show()
