@@ -470,6 +470,20 @@ class ArchiveFileManager(QtGui.QDialog):
                 os.remove(os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0)))
                 self.reloadArchiveFiles()
 
+    def importToDict(self):
+        selectedItem = self.tree.currentItem()
+        filename = selectedItem.data(1, 0)
+        words = str(selectedItem.data(2, 0))
+        reply = QtGui.QMessageBox.question(self, 'Message',
+             "Are you sure to import <b>{0} ({1} words)</b>?".format(filename, words),
+             QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            io = FileIO()
+            io.importArchivedFile(os.path.join(ARCHIVE_DIR, filename))
+            msg = QtGui.QMessageBox()
+            msg.setText("Done! {0} words imported.".format(words))
+            msg.exec_()
+        
 
 class HelpWindow(QtGui.QDialog):
     def __init__(self, parent=None):
