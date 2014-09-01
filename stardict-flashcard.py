@@ -26,17 +26,19 @@ FirstTimeHelp = True
         self.parser = configparser.ConfigParser()
         self.parser.optionxform = str # Preserve cases of keys.
         self.parser.read(CONFIG_PATH)
+        
+    def initializeGlobalVar(self):
         global DICT_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
         DICT_PATH             = os.path.expanduser(self.parser['Path']['DictPath'])
         ARCHIVE_FILE_NAME     = self.parser['Path']['ArchiveFileName']
         ARCHIVE_FILE_FULLNAME = os.path.join(ARCHIVE_DIR, ARCHIVE_FILE_NAME)
         MEMORIZED_COUNT       = int(self.parser['Main']['MemorizedCount'])
-        
-        # Archive
+        # if Archive dir & file not exist, create
         if not os.path.isdir(ARCHIVE_DIR):
             os.makedirs(ARCHIVE_DIR)
         if not os.path.exists(ARCHIVE_FILE_FULLNAME):
             open(ARCHIVE_FILE_FULLNAME, 'a').close() # touch current archive file
+
 
     def writeConfigFile(self):
         self.parser['Path']['DictPath']           = DICT_PATH
@@ -100,6 +102,7 @@ class MainWindow(QtGui.QMainWindow):
         super().__init__()
         self.io = FileIO()
         self.config = ConfigFile()
+        self.config.initializeGlobalVar()
         self._createActions()
         self._createMenus()
         self.setWindowTitle("Flashcard")
@@ -329,18 +332,24 @@ class ArchiveFileManager(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tree = QtGui.QTreeWidget()
-        self.tree.setHeaderLabels(["Filename", "Words"])
+        self.tree.setHeaderLabels(["Current", "Filename", "Words"])
 
         self.reloadArchiveFiles()
         
-        self.tree.setColumnWidth(0, 300)
-        self.tree.setColumnWidth(1, 24)           
+        self.tree.setColumnWidth(0, 24)
+        self.tree.setColumnWidth(1, 300)
+        self.tree.setColumnWidth(2, 24)
+        self.tree.setRootIsDecorated(False)
 
         # buttons
         new = QtGui.QPushButton("&New")
+        new.clicked.connect(self.new)
         rename = QtGui.QPushButton("&Rename")
+        rename.clicked.connect(self.rename)
         edit = QtGui.QPushButton("&Open && Edit")
+        edit.clicked.connect(self.edit)
         delete = QtGui.QPushButton("&Delete")
+        delete.clicked.connect(self.delete)
         importtodict = QtGui.QPushButton("&Import to Dict")
         close = QtGui.QPushButton("&Close")
         close.clicked.connect(self.close)
@@ -364,39 +373,102 @@ class ArchiveFileManager(QtGui.QDialog):
         # make main window uncontrollable.
         self.setWindowModality(QtCore.Qt.WindowModal)
 
+        # for dialog retry
+        self.userInput = ""
+
     def reloadArchiveFiles(self):
+        self.tree.clear()
         itemList = []
         for fileName in os.listdir(ARCHIVE_DIR):
             filePath = os.path.join(ARCHIVE_DIR, fileName)
             wordsAmount = sum(1 for line in open(filePath))
             item = QtGui.QTreeWidgetItem()
-            item.setData(0, 0, fileName)
-            item.setData(1, 0, str(wordsAmount))
+            item.setData(0, 0, "")
+            item.setData(1, 0, fileName)
+            item.setData(2, 0, str(wordsAmount))
             itemList.append(item)
             
         self.tree.addTopLevelItems(itemList)
+
+        # Find current archive file, and add a "check symbol" into column 0.
+        # If not exist, set the selected item as current archive file.
+        current_archive_item = self.tree.findItems(ARCHIVE_FILE_NAME,
+                                                   QtCore.Qt.MatchExactly, 1)
+        # The return value of findItems() is a list, which contains all matched items.
+        if len(current_archive_item) > 0:
+            current_archive_item[0].setData(0, 0, "\u2713")
+        else:
+            global ARCHIVE_FILE_NAME
+            first_item = self.tree.itemAt(0, 0)
+            ARCHIVE_FILE_NAME = first_item.data(1, 0)
+            first_item.setData(0, 0, "\u2713")
+            config_file = ConfigFile()
+            config_file.writeConfigFile()
 
     def new(self):
         filename, ok = QtGui.QInputDialog.getText(self,
                                                   "Create a new archive",
                                                   "Please input a name for new archive file :",
                                                   QtGui.QLineEdit.Normal,
-                                                  "")
+                                                  self.userInput)
         if ok and filename != '':
-            open(os.path.join(ARCHIVE_DIR, filename), 'a').close()
-            self.reloadArchiveFiles()
+            if filename in os.listdir(ARCHIVE_DIR):
+                msg = QtGui.QMessageBox()
+                msg.setText("Filename has already existed, please retry.")
+                msg.show()
+                msg.exec_()
+                self.userInput = filename
+                self.new()
+            else:
+                open(os.path.join(ARCHIVE_DIR, filename), 'a').close()
+                self.reloadArchiveFiles()
+                self.userInput = ""
+        else:
+            self.userInput = ""
 
-    def rename(self): 
-        filename, ok = QtGui.QInputDialog.getText(self,
-                                                  "Rename the archive file",
-                                                  "Please input a new name for this archive file :",
-                                                  QtGui.QLineEdit.Normal,
-                                                  "")
-#            if ok and filename != '':
-#                if filename in 
-#                os.rename()
-                
+    def rename(self):
+        oldFilename = self.tree.currentItem().data(1, 0)
+        newFilename, ok = QtGui.QInputDialog.getText(self,
+                                                     "Rename the archive file",
+                                                     "Please input a new name for this archive file :",
+                                                     QtGui.QLineEdit.Normal,
+                                                     oldFilename)
+        if ok and newFilename != '':
+            if newFilename in os.listdir(ARCHIVE_DIR):
+                msg = QtGui.QMessageBox()
+                msg.setText("Filename has already existed, please retry.")
+                msg.show()
+                msg.exec_()
+                self.rename()
+            else:
+                os.rename(os.path.join(ARCHIVE_DIR, oldFilename),
+                          os.path.join(ARCHIVE_DIR, newFilename))
+                self.reloadArchiveFiles()
 
+    def edit(self):
+        editor = os.getenv('EDITOR')
+        if editor == '':
+            editor = 'vi'
+        subprocess.call([editor,
+                         os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0))],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL)
+        self.reloadArchiveFiles()
+
+    def delete(self):
+        if len(os.listdir(ARCHIVE_DIR)) <= 1:
+            msg = QtGui.QMessageBox()
+            msg.setText("You have to reserve at least one archive file.")
+            msg.exec_()
+        else:
+            reply = QtGui.QMessageBox.question(self, 'Message',
+                                           """Are you sure to delete <b>{0}</b>?<br>
+         (This action cannot be undone!)""".format(self.tree.currentItem().data(1, 0)),
+                                           QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+            if reply == QtGui.QMessageBox.Yes:
+                os.remove(os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0)))
+                self.reloadArchiveFiles()
 
 
 class HelpWindow(QtGui.QDialog):
