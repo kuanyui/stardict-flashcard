@@ -97,6 +97,15 @@ class FileIO():
         self.archive_content = ''
         self.initializeFile()
 
+    def editWithSystemEditor(self, filePath):
+        editor = os.getenv('EDITOR')
+        if editor == '':
+            editor = 'vi'
+        subprocess.call([editor,
+                         os.path.join(ARCHIVE_DIR, filePath)],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL)
+
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
@@ -351,6 +360,7 @@ class ArchiveFileManager(QtGui.QDialog):
         delete = QtGui.QPushButton("&Delete")
         delete.clicked.connect(self.delete)
         importtodict = QtGui.QPushButton("&Import to Dict")
+        importtodict.clicked.connect(self.importToDict)
         close = QtGui.QPushButton("&Close")
         close.clicked.connect(self.close)
 
@@ -446,13 +456,7 @@ class ArchiveFileManager(QtGui.QDialog):
                 self.reloadArchiveFiles()
 
     def edit(self):
-        editor = os.getenv('EDITOR')
-        if editor == '':
-            editor = 'vi'
-        subprocess.call([editor,
-                         os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0))],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL)
+        FileIO().editWithSystemEditor(self.tree.currentItem().data(1, 0))
         self.reloadArchiveFiles()
 
     def delete(self):
