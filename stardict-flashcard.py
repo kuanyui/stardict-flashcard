@@ -328,17 +328,13 @@ class ConfigWindow(QtGui.QDialog):
 class ArchiveFileManager(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.view = QtGui.QTreeView()
-
-        self.model = QtGui.QStandardItemModel(0, 2, parent)
-        self.model.setHeaderData(0, QtCore.Qt.Horizontal, 'Filename')
-        self.model.setHeaderData(1, QtCore.Qt.Horizontal, 'Words')
+        self.tree = QtGui.QTreeWidget()
+        self.tree.setHeaderLabels(["Filename", "Words"])
 
         self.reloadArchiveFiles()
         
-        self.view.setModel(self.model)
-        self.view.setColumnWidth(0, 300)
-        self.view.setColumnWidth(1, 24)           
+        self.tree.setColumnWidth(0, 300)
+        self.tree.setColumnWidth(1, 24)           
 
         # buttons
         new = QtGui.QPushButton("&New")
@@ -361,7 +357,7 @@ class ArchiveFileManager(QtGui.QDialog):
 
         #layout
         main_layout = QtGui.QHBoxLayout()
-        main_layout.addWidget(self.view)
+        main_layout.addWidget(self.tree)
         main_layout.addLayout(button_layout)
         self.setLayout(main_layout)
         self.resize(500, 300)
@@ -369,15 +365,16 @@ class ArchiveFileManager(QtGui.QDialog):
         self.setWindowModality(QtCore.Qt.WindowModal)
 
     def reloadArchiveFiles(self):
-        index = 0
-        for file in os.listdir(ARCHIVE_DIR):
-            filePath = os.path.join(ARCHIVE_DIR, file)
+        itemList = []
+        for fileName in os.listdir(ARCHIVE_DIR):
+            filePath = os.path.join(ARCHIVE_DIR, fileName)
             wordsAmount = sum(1 for line in open(filePath))
-            item_filename = QtGui.QStandardItem(file)
-            item_wordsamount = QtGui.QStandardItem(str(wordsAmount))
-            self.model.setItem(index, 0, item_filename)
-            self.model.setItem(index, 1, item_wordsamount)
-            index += 1
+            item = QtGui.QTreeWidgetItem()
+            item.setData(0, 0, fileName)
+            item.setData(1, 0, str(wordsAmount))
+            itemList.append(item)
+            
+        self.tree.addTopLevelItems(itemList)
 
     def new(self):
         filename, ok = QtGui.QInputDialog.getText(self,
