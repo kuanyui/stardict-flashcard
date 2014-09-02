@@ -320,12 +320,12 @@ You also can import an archived file to start another reviewing.''')
         )
         self.openDictFileAct = QtGui.QAction(
             "&Open Dict File", self,
-            statusTip = "Open Dict file with default editor on system.",
+            statusTip = "Open Dict file with system default editor.",
             triggered = self.openDictFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
             "&Open Archive Directory", self,
-            statusTip = "Open archive directory with file manager.",
+            statusTip = "Open archive directory with external file manager.",
             triggered = self.openArchiveDirectory
         )
 
@@ -636,14 +636,46 @@ Please input new file name for merged file:
                             with open(os.path.join(ARCHIVE_DIR, x), 'r') as file:
                                 fileContent = file.read()
                                 mergedFile.write(fileContent)
+                    self.reloadArchiveFiles()
                     msg = QtGui.QMessageBox()
+                    msg.setIcon(QtGui.QMessageBox.Information)
                     msg.setText("File merged!")
                     msg.exec_()
-                    self.reloadArchiveFiles()
 
     def removeDuplicated(self):
-        None
+        selected_item = self.tree.currentItem()
+        if selected_item == None:
+            return None         # Jump out of function
+        filename = selected_item.data(1, 0)
+        reply = QtGui.QMessageBox.question(self, 'Message',
+"""This action will remove all duplicated words in <b>{0}</b>.<br>
+This action cannot be undone, continue?""".format(filename),
+                                           QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         
+        if reply == QtGui.QMessageBox.No:
+            return None         # Jump out of function
+        seenWords = set()
+        lineList = []
+        newLinesList = []
+        duplicatedCount = 0
+        with open(os.path.join(ARCHIVE_DIR, filename), 'r') as file:
+            linesList = file.readlines()
+            for line in linesList:
+                word = line.partition('\t')[0] # Get only word (get rid of count num)
+                if word not in seenWords:
+                    newLinesList.append(line)
+                else:
+                    duplicatedCount += 1
+                seenWords.add(word)
+        with open(os.path.join(ARCHIVE_DIR, filename), 'w') as file:
+            file.writelines(newLinesList)
+        self.reloadArchiveFiles()
+        msg = QtGui.QMessageBox()
+        msg.setWindowTitle('Remove Duplicated')
+        msg.setIcon(QtGui.QMessageBox.Information)
+        msg.setText('Done! {0} duplicated word removed.'.format(duplicatedCount))
+        msg.exec_()
+            
     def delete(self):
         if len(os.listdir(ARCHIVE_DIR)) <= 1:
             msg = QtGui.QMessageBox()
