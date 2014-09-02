@@ -93,15 +93,18 @@ class FileIO():
             file.write(self.wordList[index][0] + '\n')
         # Delete word from list (but not write list into dict file yet)
         del self.wordList[index]
-        self._writeLineListIntoFile()
+        self.formatWordListAndWriteIntoFile()
+
+    def removeWord(self, index):
+        del self.wordList[index]
+        self.formatWordListAndWriteIntoFile()
 
     def importArchivedFile(self, archiveFilename):
         with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'r') as archiveFile:
             archive_content = archiveFile.read() # [FIXME] May I must to use self in here?
         with open(DICT_PATH, 'a') as dictFile:
-            print(archive_content)
             dictFile.write(archive_content)
-        #self.initializeFile()
+        self.initializeFile()
 
     def archiveWholeDict(self, archiveFilename):
         with open(DICT_PATH, 'r') as file:
@@ -110,7 +113,7 @@ class FileIO():
             file.write(wholeDictContent)
         # Clear dict file.
         self.wordList = []
-        self._writeLineListIntoFile()
+        self.formatWordListAndWriteIntoFile()
         
     def editWithSystemEditor(self, filePath):
         editor = os.getenv('EDITOR')
@@ -166,6 +169,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def refresh(self):
         if len(self.io.wordList) == 0:
+            self.allWordsFinished()
             return None         # jump out of function
         if self.io.wordList[self.index][1] >= MEMORIZED_COUNT:
             self.archiveCurrentWord()
@@ -192,10 +196,11 @@ class MainWindow(QtGui.QMainWindow):
         self.now = 'answered'
 
     def allWordsFinished(self):
+        self.now = None
         self.word_label.setText("Cleared!")
         self.description_browser.setText('''No word remains in dict file now.
-Now you can add new word via StarDict (Alt + e),
-or import an archived file to start another reviewing.''')
+Now you can add new word via StarDict (Alt + e).
+You also can import an archived file to start another reviewing.''')
         
     def correctIndex(self):
         '''If no word remains in wordList, call allWordsFinished().
@@ -256,8 +261,14 @@ or import an archived file to start another reviewing.''')
                                                      QtGui.QLineEdit.Normal,
                                                      "[dict]")
         if ok and filename != '':
-            self.io.archiveWholeDict(filename)
-            self.openArchiveFileManager()
+            if filename in os.listdir(ARCHIVE_DIR):
+                reply = QtGui.QMessageBox.question(self, 'Message',
+                    '''File <b>{0}</b> existed, overwrite it?'''.format(filename),
+                    QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.Yes:
+                    self.io.archiveWholeDict(filename)
+                    self.allWordsFinished()
+                    self.openArchiveFileManager()
         
     
     # Windows
@@ -289,7 +300,7 @@ or import an archived file to start another reviewing.''')
         )
         self.openArchiveFileManagerAct = QtGui.QAction(
             "&Manage", self,
-            shortcut = QtGui.QKeySequence.SelectAll,
+            shortcut = QtGui.QKeySequence("Ctrl+M"),
             statusTip = "Create, import, rename, edit, delete archive file.",
             triggered = self.openArchiveFileManager
         )
@@ -540,8 +551,7 @@ class ArchiveFileManager(QtGui.QDialog):
             msg = QtGui.QMessageBox()
             msg.setText("Done! {0} words imported.".format(words))
             msg.exec_()
-            self.parent.io.initializeFile() # parent should be main window
-            self.parent.refresh()
+            self.parent.refresh() # parent should be main window
         
 
 class HelpWindow(QtGui.QDialog):
