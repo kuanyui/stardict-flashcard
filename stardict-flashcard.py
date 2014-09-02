@@ -428,30 +428,41 @@ class ArchiveFileManager(QtGui.QDialog):
         self.tree.setColumnWidth(2, 24)
         self.tree.setRootIsDecorated(False)
 
+        self.tree.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.tree.itemClicked.connect(self.updateButtonState)
+        
         # buttons
-        new = QtGui.QPushButton("&New")
-        new.clicked.connect(self.new)
-        rename = QtGui.QPushButton("&Rename")
-        rename.clicked.connect(self.rename)
-        edit = QtGui.QPushButton("&Edit")
-        edit.clicked.connect(self.edit)
-        delete = QtGui.QPushButton("&Delete")
-        delete.clicked.connect(self.delete)
-        import_to_dict = QtGui.QPushButton("&Import to Dict")
-        import_to_dict.clicked.connect(self.importToDict)
-        set_as_default = QtGui.QPushButton("&Set As Default\nArchive File")
-        set_as_default.clicked.connect(self.setAsDefault)
-        close = QtGui.QPushButton("&Close")
+        self.b_new              = QtGui.QPushButton("&New")
+        self.b_new.clicked.connect(self.new)
+        self.b_rename           = QtGui.QPushButton("&Rename")
+        self.b_rename.clicked.connect(self.rename)
+        self.b_edit             = QtGui.QPushButton("&Edit")
+        self.b_edit.clicked.connect(self.edit)
+        self.b_merge            = QtGui.QPushButton("&Merge")
+        self.b_merge.clicked.connect(self.merge)
+        self.b_delete           = QtGui.QPushButton("&Delete")
+        self.b_delete.clicked.connect(self.delete)
+        self.b_remove_duplicate = QtGui.QPushButton("Remove Duplicated")
+        self.b_remove_duplicate.clicked.connect(self.removeDuplicated)
+        self.b_import_to_dict   = QtGui.QPushButton("&Import to Dict")
+        self.b_import_to_dict.clicked.connect(self.importToDict)
+        self.b_set_as_default   = QtGui.QPushButton("&Set As Default\nArchive File")
+        self.b_set_as_default.clicked.connect(self.setAsDefault)
+        close                   = QtGui.QPushButton("&Close")
         close.clicked.connect(self.close)
 
+        
         button_layout = QtGui.QVBoxLayout()
-        button_layout.addWidget(new)
-        button_layout.addWidget(rename)
-        button_layout.addWidget(edit)
-        button_layout.addWidget(delete)
+        button_layout.addWidget(self.b_new)
+        button_layout.addWidget(self.b_rename)
+        button_layout.addWidget(self.b_edit)
+        button_layout.addWidget(self.b_merge)
+        button_layout.addWidget(self.b_delete)
         button_layout.addSpacing(16)
-        button_layout.addWidget(import_to_dict)
-        button_layout.addWidget(set_as_default)
+        button_layout.addWidget(self.b_remove_duplicate)
+        button_layout.addSpacing(16)
+        button_layout.addWidget(self.b_import_to_dict)
+        button_layout.addWidget(self.b_set_as_default)
         button_layout.addStretch()
         button_layout.addWidget(close)
 
@@ -460,13 +471,31 @@ class ArchiveFileManager(QtGui.QDialog):
         main_layout.addWidget(self.tree)
         main_layout.addLayout(button_layout)
         self.setLayout(main_layout)
-        self.resize(500, 300)
+        self.resize(550, 300)
         # make main window uncontrollable.
         self.setWindowModality(QtCore.Qt.WindowModal)
 
         # for dialog retry
         self.userInput = ""
 
+    def updateButtonState(self):
+        if len(self.tree.selectedItems()) > 1:
+            self.b_new.setEnabled(False)
+            self.b_rename.setEnabled(False)
+            self.b_edit.setEnabled(False)
+            self.b_delete.setEnabled(False)
+            self.b_remove_duplicate.setEnabled(False)
+            self.b_import_to_dict.setEnabled(False)
+            self.b_set_as_default.setEnabled(False)
+        else:
+            self.b_new.setEnabled(True)
+            self.b_rename.setEnabled(True)
+            self.b_edit.setEnabled(True)
+            self.b_delete.setEnabled(True)
+            self.b_remove_duplicate.setEnabled(True)
+            self.b_import_to_dict.setEnabled(True)
+            self.b_set_as_default.setEnabled(True)
+            
     def reloadArchiveFiles(self):
         global ARCHIVE_FILE_NAME
         self.tree.clear()
@@ -551,6 +580,51 @@ class ArchiveFileManager(QtGui.QDialog):
         FileIO().editWithSystemEditor(self.tree.currentItem().data(1, 0))
         self.reloadArchiveFiles()
 
+
+    def merge(self):
+        if len(self.tree.selectedItems()) <= 1:
+            msg = QtGui.QMessageBox()
+            msg.setText("Please press Ctrl and click to select multiple items first.")
+            msg.exec_()
+        else:
+            filenameList = []
+            for item in self.tree.selectedItems():
+                filenameList.append(item.data(1, 0))
+                
+            formatedFilenameList = ""
+            for filename in filenameList:
+                formatedFilenameList = formatedFilenameList + "<li>{0}</li>".format(filename)
+                
+            mergedFilename, ok = QtGui.QInputDialog.getText(self,
+                                                         "Merge",
+"""You are about merging the following files:<br>
+<ol>{0}</ol>
+Please input new file name for merged file:
+(You cannot use an existed file name)
+""".format(formatedFilenameList),
+                                                         QtGui.QLineEdit.Normal,
+                                                         filenameList[0])
+            # Merge file
+            if ok and mergedFilename != '':
+                if mergedFilename in os.listdir(ARCHIVE_DIR):
+                    msg = QtGui.QMessageBox()
+                    msg.setText("Filename has existed, please input another one.")
+                    msg.exec_()
+                    self.merge()
+                else:
+                    with open(os.path.join(ARCHIVE_DIR, mergedFilename), 'a') as mergedFile:
+                        for x in filenameList:
+                            with open(os.path.join(ARCHIVE_DIR, x), 'r') as file:
+                                fileContent = file.read()
+                                mergedFile.write(fileContent)
+                    msg = QtGui.QMessageBox()
+                    msg.setText("File merged!")
+                    msg.exec_()
+                    self.reloadArchiveFiles()
+
+    def removeDuplicated(self):
+        None
+        
     def delete(self):
         if len(os.listdir(ARCHIVE_DIR)) <= 1:
             msg = QtGui.QMessageBox()
