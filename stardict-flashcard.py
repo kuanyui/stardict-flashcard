@@ -109,7 +109,7 @@ class FileIO():
     def archiveWholeDict(self, archiveFilename):
         with open(DICT_PATH, 'r') as file:
             wholeDictContent = file.read()
-        with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'a') as file:
+        with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'w') as file:
             file.write(wholeDictContent)
         # Clear dict file.
         self.wordList = []
@@ -171,6 +171,8 @@ class MainWindow(QtGui.QMainWindow):
         if len(self.io.wordList) == 0:
             self.allWordsFinished()
             return None         # jump out of function
+        else:
+            self.archiveDictAct.setEnabled(True)
         if self.io.wordList[self.index][1] >= MEMORIZED_COUNT:
             self.archiveCurrentWord()
         else:
@@ -197,6 +199,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def allWordsFinished(self):
         self.now = None
+        self.archiveDictAct.setEnabled(False)
         self.word_label.setText("Cleared!")
         self.description_browser.setText('''No word remains in dict file now.
 Now you can add new word via StarDict (Alt + e).
@@ -255,21 +258,8 @@ You also can import an archived file to start another reviewing.''')
 
     def archiveDict(self):
         '''Archive all words in dict.'''
-        filename, ok = QtGui.QInputDialog.getText(self,
-                                                    "Input archive file",
-                                                    "Please input a filename for archiving the dict:",
-                                                     QtGui.QLineEdit.Normal,
-                                                     "[dict]")
-        if ok and filename != '':
-            if filename in os.listdir(ARCHIVE_DIR):
-                reply = QtGui.QMessageBox.question(self, 'Message',
-                    '''File <b>{0}</b> existed, overwrite it?'''.format(filename),
-                    QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-                if reply == QtGui.QMessageBox.Yes:
-                    self.io.archiveWholeDict(filename)
-                    self.allWordsFinished()
-                    self.openArchiveFileManager()
-        
+        self.archive_list = ArchiveList(self)
+        self.archive_list.show()
     
     # Windows
     def openConfigWindow(self):
@@ -338,6 +328,47 @@ You also can import an archived file to start another reviewing.''')
         self.menu_bar.addAction(self.openHelpWindowAct)
         
 
+class ArchiveList(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.line_edit = QtGui.QLineEdit()
+        list_widget = QtGui.QListWidget()
+        for filename in os.listdir(ARCHIVE_DIR):
+            list_widget.addItem(filename)
+
+        list_widget.itemClicked.connect(self.setLineEditText)
+
+        button_box = QtGui.QDialogButtonBox(
+            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.apply)
+        button_box.rejected.connect(self.close)
+        
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(QtGui.QLabel("Please input filename for archiving the dict,\n"
+                                      "or select an existed one:"))
+        layout.addWidget(self.line_edit)
+        layout.addWidget(list_widget)
+        layout.addWidget(button_box)
+
+        self.setLayout(layout)
+        self.setWindowTitle("Input archive file")
+        
+    def setLineEditText(self, item):
+        self.line_edit.setText(item.text())
+
+    def apply(self):
+        filename = self.line_edit.text()
+        if filename in os.listdir(ARCHIVE_DIR):
+            reply = QtGui.QMessageBox.question(
+                self, 'Message',
+                "Are you sure to overwrite file <b>{0}</b>?".format(filename),
+                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.Yes:
+                self.parent.io.archiveWholeDict(filename)
+                self.parent.allWordsFinished()
+                self.parent.openArchiveFileManager()
+                self.close()
         
 
 class ConfigWindow(QtGui.QDialog):
@@ -529,14 +560,17 @@ class ArchiveFileManager(QtGui.QDialog):
             msg.setText("You have to reserve at least one archive file.")
             msg.exec_()
         else:
-            reply = QtGui.QMessageBox.question(self, 'Message',
-                                           """Are you sure to delete <b>{0}</b>?<br>
-         (This action cannot be undone!)""".format(self.tree.currentItem().data(1, 0)),
-                                           QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
-            if reply == QtGui.QMessageBox.Yes:
-                os.remove(os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0)))
-                self.reloadArchiveFiles()
+            if self.tree.currentItem():
+                filename = self.tree.currentItem().data(1, 0)
+                reply = QtGui.QMessageBox.question(self, 'Message',
+                                                   """Are you sure to delete <b>{0}</b>?<br>
+                                                   (This action cannot be undone!)""".format(filename),
+                                                   QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+    
+                if reply == QtGui.QMessageBox.Yes:
+                    os.remove(os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0)))
+                    self.reloadArchiveFiles()
 
     def importToDict(self):
         selectedItem = self.tree.currentItem()
