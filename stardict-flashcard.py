@@ -439,7 +439,7 @@ class ArchiveFileManager(QtGui.QDialog):
         delete.clicked.connect(self.delete)
         import_to_dict = QtGui.QPushButton("&Import to Dict")
         import_to_dict.clicked.connect(self.importToDict)
-        set_as_default = QtGui.QPushButton("&Set As Default")
+        set_as_default = QtGui.QPushButton("&Set As Default\nArchive File")
         set_as_default.clicked.connect(self.setAsDefault)
         close = QtGui.QPushButton("&Close")
         close.clicked.connect(self.close)
@@ -499,10 +499,11 @@ class ArchiveFileManager(QtGui.QDialog):
             config_file.writeConfigFile()
 
     def setAsDefault(self):
-        global ARCHIVE_FILE_NAME
+        global ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME
         if self.tree.currentItem():
             filename = self.tree.currentItem().data(1, 0)
             ARCHIVE_FILE_NAME = filename
+            ARCHIVE_FILE_FULLNAME = os.path.join(ARCHIVE_DIR, filename)
             self.parent.config.writeConfigFile()
             self.reloadArchiveFiles()
             
