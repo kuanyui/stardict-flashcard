@@ -265,18 +265,9 @@ You also can import an archived file to start another reviewing.''')
             self.showDescription()
         elif self.now == 'answered':
             self.incfIndex()
-         
 
     def closeEvent(self, event):
         self.io.formatWordListAndWriteIntoFile()
-        #reply = QtGui.QMessageBox.question(self, 'Message',
-        #    "Are you sure to quit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-
-        #if reply == QtGui.QMessageBox.Yes:
-        #    self.io.formatWordListAndWriteIntoFile()
-        #    event.accept()
-        #else:
-        #    event.ignore()
 
     def archiveDict(self):
         '''Archive all words in dict.'''
