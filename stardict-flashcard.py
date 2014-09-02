@@ -68,7 +68,6 @@ class FileIO():
         self.lineList = lineList     # lineList = ['噂\t2\n','納得\t0\n']
         self._writeLineListIntoFile()
         self.readFileIntoWordList()
-        print(self.wordList)
 
     def _writeLineListIntoFile(self):
         with open(DICT_PATH, 'w') as file:
@@ -133,6 +132,20 @@ class MainWindow(QtGui.QMainWindow):
         self._createMenus()
         self.setWindowTitle("Flashcard")
 
+        # StatusBar
+        self.statusBar()        # So Easy!
+
+        self.vertical_spliter = QtGui.QFrame()
+        self.vertical_spliter.setGeometry(20,20,50,20)
+        self.vertical_spliter.setFrameShape(QtGui.QFrame.VLine)
+        self.vertical_spliter.setFrameShadow(QtGui.QFrame.Sunken)
+        self.status_index = QtGui.QLabel()
+        self.status_current_archive = QtGui.QLabel()
+        self.statusBar().insertPermanentWidget(0, self.status_current_archive)
+        self.statusBar().insertPermanentWidget(1, self.vertical_spliter)
+        self.statusBar().insertPermanentWidget(2, self.status_index)
+        self.status_current_archive.setText(ARCHIVE_FILE_NAME)
+
         # Layout
         self.word_label = QtGui.QLabel()
         self.word_label.setAlignment(QtCore.Qt.AlignCenter)
@@ -192,6 +205,13 @@ class MainWindow(QtGui.QMainWindow):
             self.formattedOut = formattedOut
             self.description_browser.setText("")
             self.now = 'unanswered'
+        self.refreshStatusBar()
+
+    def refreshStatusBar(self):
+        wordsTotal = len(self.io.wordList)
+        index = self.index + 1
+        if wordsTotal > 1:
+            self.status_index.setText("{0}/{1}".format(index, wordsTotal))
 
     def showDescription(self):
         self.description_browser.setHtml(self.formattedOut)
@@ -236,6 +256,8 @@ You also can import an archived file to start another reviewing.''')
             else:
                 self.incfIndex()
             self.io.formatWordListAndWriteIntoFile()
+            self.statusBar().showMessage("Bingo!")
+            QtCore.QTimer.singleShot(1000, lambda: self.statusBar().clearMessage())
 
     def goOn(self):
         '''After press space, decide to bingo() or just incfIndex()'''
@@ -307,12 +329,12 @@ You also can import an archived file to start another reviewing.''')
         )
         self.openDictFileAct = QtGui.QAction(
             "&Open Dict File", self,
-            statusTip = "",
+            statusTip = "Open Dict file with default editor on system.",
             triggered = self.openDictFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
             "&Open Archive Directory", self,
-            statusTip = "",
+            statusTip = "Open archive directory with file manager.",
             triggered = self.openArchiveDirectory
         )
 
@@ -526,6 +548,7 @@ class ArchiveFileManager(QtGui.QDialog):
             first_item.setData(0, 0, "\u2713")
             config_file = ConfigFile()
             config_file.writeConfigFile()
+            self.parent.status_current_archive.setText(ARCHIVE_FILE_NAME)
 
     def setAsDefault(self):
         global ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME
@@ -535,6 +558,7 @@ class ArchiveFileManager(QtGui.QDialog):
             ARCHIVE_FILE_FULLNAME = os.path.join(ARCHIVE_DIR, filename)
             self.parent.config.writeConfigFile()
             self.reloadArchiveFiles()
+            self.parent.status_current_archive.setText(ARCHIVE_FILE_NAME)
             
     def new(self):
         filename, ok = QtGui.QInputDialog.getText(self,
@@ -558,6 +582,8 @@ class ArchiveFileManager(QtGui.QDialog):
             self.userInput = ""
 
     def rename(self):
+        if self.tree.currentItem() == None:
+            return None
         oldFilename = self.tree.currentItem().data(1, 0)
         newFilename, ok = QtGui.QInputDialog.getText(self,
                                                      "Rename the archive file",
