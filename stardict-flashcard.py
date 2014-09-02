@@ -582,6 +582,7 @@ class ArchiveFileManager(QtGui.QDialog):
             self.userInput = ""
 
     def rename(self):
+        global ARCHIVE_FILE_NAME
         if self.tree.currentItem() == None:
             return None
         oldFilename = self.tree.currentItem().data(1, 0)
@@ -600,6 +601,7 @@ class ArchiveFileManager(QtGui.QDialog):
             else:
                 os.rename(os.path.join(ARCHIVE_DIR, oldFilename),
                           os.path.join(ARCHIVE_DIR, newFilename))
+                ARCHIVE_FILE_NAME = newFilename
                 self.reloadArchiveFiles()
 
     def edit(self):
@@ -619,7 +621,7 @@ class ArchiveFileManager(QtGui.QDialog):
                 
             formatedFilenameList = ""
             for filename in filenameList:
-                formatedFilenameList = formatedFilenameList + "<li>{0}</li>".format(filename)
+                formatedFilenameList = formatedFilenameList + "<li><i>{0}</i></li>".format(filename)
                 
             mergedFilename, ok = QtGui.QInputDialog.getText(self,
                                                          "Merge",
