@@ -561,7 +561,7 @@ class ArchiveFileManager(QtGui.QDialog):
             if filename in os.listdir(ARCHIVE_DIR):
                 msg = QtGui.QMessageBox()
                 msg.setText("Filename has already existed, please retry.")
-                msg.show()
+                msg.setIcon(QtGui.QMessageBox.Information)
                 msg.exec_()
                 self.userInput = filename
                 self.new()
@@ -586,7 +586,7 @@ class ArchiveFileManager(QtGui.QDialog):
             if newFilename in os.listdir(ARCHIVE_DIR):
                 msg = QtGui.QMessageBox()
                 msg.setText("Filename has already existed, please retry.")
-                msg.show()
+                msg.setIcon(QtGui.QMessageBox.Information)
                 msg.exec_()
                 self.rename()
             else:
@@ -603,6 +603,7 @@ class ArchiveFileManager(QtGui.QDialog):
     def merge(self):
         if len(self.tree.selectedItems()) <= 1:
             msg = QtGui.QMessageBox()
+            msg.setIcon(QtGui.QMessageBox.Information)
             msg.setText("Please press Ctrl and click to select multiple items first.")
             msg.exec_()
         else:
@@ -627,6 +628,7 @@ Please input new file name for merged file:
             if ok and mergedFilename != '':
                 if mergedFilename in os.listdir(ARCHIVE_DIR):
                     msg = QtGui.QMessageBox()
+                    msg.setIcon(QtGui.QMessageBox.Information)
                     msg.setText("Filename has existed, please input another one.")
                     msg.exec_()
                     self.merge()
@@ -679,6 +681,7 @@ This action cannot be undone, continue?""".format(filename),
     def delete(self):
         if len(os.listdir(ARCHIVE_DIR)) <= 1:
             msg = QtGui.QMessageBox()
+            msg.setIcon(QtGui.QMessageBox.Information)
             msg.setText("You have to reserve at least one archive file.")
             msg.exec_()
         else:
@@ -707,6 +710,7 @@ This action cannot be undone, continue?""".format(filename),
             
             self.parent.io.importArchivedFile(filename)
             msg = QtGui.QMessageBox()
+            msg.setIcon(QtGui.QMessageBox.Information)
             msg.setText("Done! {0} words imported.".format(words))
             msg.exec_()
             self.parent.refresh() # parent should be main window
