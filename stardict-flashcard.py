@@ -645,6 +645,8 @@ Please input new file name for merged file:
 
     def importToDict(self):
         selectedItem = self.tree.currentItem()
+        if selectedItem == None:
+            return None         # Jump out of function
         filename = selectedItem.data(1, 0)
         words = str(selectedItem.data(2, 0))
         reply = QtGui.QMessageBox.question(self, 'Message',
