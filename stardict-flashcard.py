@@ -380,11 +380,6 @@ class ConfigWindow(QtGui.QDialog):
         button_dict_path = QtGui.QPushButton("Browse Dict...")
         button_dict_path.clicked.connect(self.browseDictPath)
         
-        self.line_archive_path = QtGui.QLineEdit()
-        self.line_archive_path.setText(ARCHIVE_FILE_FULLNAME)
-        button_archive_path = QtGui.QPushButton("Browse Archive...")
-        button_archive_path.clicked.connect(self.browseArchivePath)
-
         self.spin_box = QtGui.QSpinBox()
         self.spin_box.setRange(1, 100)
         self.spin_box.setValue(MEMORIZED_COUNT)
@@ -397,12 +392,9 @@ class ConfigWindow(QtGui.QDialog):
         layout.addWidget(QtGui.QLabel("Dict file path:"), 0, 0)
         layout.addWidget(self.line_dict_path, 0, 1)
         layout.addWidget(button_dict_path, 0, 2)
-        layout.addWidget(QtGui.QLabel("Current archive file path:"), 1, 0)
-        layout.addWidget(self.line_archive_path, 1, 1)
-        layout.addWidget(button_archive_path, 1, 2)
-        layout.addWidget(QtGui.QLabel("Memorized count:"), 2, 0)
-        layout.addWidget(self.spin_box, 2, 1, 1, 1)
-        layout.addWidget(button_box, 3, 1, 1, 2)
+        layout.addWidget(QtGui.QLabel("Memorized count:"), 1, 0)
+        layout.addWidget(self.spin_box, 1, 1, 1, 1)
+        layout.addWidget(button_box, 2, 1, 1, 2)
 
         self.setLayout(layout)
         self.adjustSize()
@@ -414,17 +406,9 @@ class ConfigWindow(QtGui.QDialog):
         if path:
             self.line_dict_path.setText(path)
 
-    def browseArchivePath(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Select Archive File Path",
-                                                 ARCHIVE_DIR)
-        if path:
-            self.line_archive_path.setText(path)
-
     def applyAndWriteConfigFile(self):
-        global DICT_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
+        global DICT_PATH, MEMORIZED_COUNT
         DICT_PATH             = str(self.line_dict_path.text())
-        ARCHIVE_FILE_FULLNAME = str(self.line_archive_path.text())
-        ARCHIVE_FILE_NAME     = os.path.basename(ARCHIVE_FILE_FULLNAME)
         MEMORIZED_COUNT       = int(self.spin_box.value())
 
         self.parent.config.writeConfigFile()
@@ -453,8 +437,10 @@ class ArchiveFileManager(QtGui.QDialog):
         edit.clicked.connect(self.edit)
         delete = QtGui.QPushButton("&Delete")
         delete.clicked.connect(self.delete)
-        importtodict = QtGui.QPushButton("&Import to Dict")
-        importtodict.clicked.connect(self.importToDict)
+        import_to_dict = QtGui.QPushButton("&Import to Dict")
+        import_to_dict.clicked.connect(self.importToDict)
+        set_as_default = QtGui.QPushButton("&Set As Default")
+        set_as_default.clicked.connect(self.setAsDefault)
         close = QtGui.QPushButton("&Close")
         close.clicked.connect(self.close)
 
@@ -464,7 +450,8 @@ class ArchiveFileManager(QtGui.QDialog):
         button_layout.addWidget(edit)
         button_layout.addWidget(delete)
         button_layout.addSpacing(16)
-        button_layout.addWidget(importtodict)
+        button_layout.addWidget(import_to_dict)
+        button_layout.addWidget(set_as_default)
         button_layout.addStretch()
         button_layout.addWidget(close)
 
@@ -495,6 +482,7 @@ class ArchiveFileManager(QtGui.QDialog):
             
         self.tree.addTopLevelItems(itemList)
 
+        # Check Symbol for Default Archive File
         # Find current archive file, and add a "check symbol" into column 0.
         # If not exist, set the first item as current archive file.
         current_archive_item = self.tree.findItems(ARCHIVE_FILE_NAME,
@@ -510,6 +498,14 @@ class ArchiveFileManager(QtGui.QDialog):
             config_file = ConfigFile()
             config_file.writeConfigFile()
 
+    def setAsDefault(self):
+        global ARCHIVE_FILE_NAME
+        if self.tree.currentItem():
+            filename = self.tree.currentItem().data(1, 0)
+            ARCHIVE_FILE_NAME = filename
+            self.parent.config.writeConfigFile()
+            self.reloadArchiveFiles()
+            
     def new(self):
         filename, ok = QtGui.QInputDialog.getText(self,
                                                   "Create a new archive",
