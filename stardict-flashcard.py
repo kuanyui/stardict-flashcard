@@ -127,7 +127,7 @@ class IconButton(QtGui.QPushButton):
     def __init__(self, align, iconFilename, text, function):
         super().__init__()
         self.setIcon(QtGui.QIcon("icons/actions/" + iconFilename))
-        self.setText(text)
+        self.setText(self.tr(text))
         if align == 'l':
             self.setStyleSheet("text-align:left")
         elif align == 'r':
@@ -141,7 +141,7 @@ class MainWindow(QtGui.QMainWindow):
         self.config.initializeGlobalVar()
         self._createActions()
         self._createMenus()
-        self.setWindowTitle("Flashcard")
+        self.setWindowTitle("Stardict Flashcard")
 
         # StatusBar
         self.statusBar()        # So Easy!
@@ -232,9 +232,9 @@ class MainWindow(QtGui.QMainWindow):
         self.now = None
         self.archiveDictAct.setEnabled(False)
         self.word_label.setText("Cleared!")
-        self.description_browser.setText('''No word remains in dict file now.
+        self.description_browser.setText(self.tr('''No word remains in dict file now.
 Now you can add new word via StarDict (Alt + e).
-You also can import an archived file to start another reviewing.''')
+You also can import an archived file to start another reviewing.'''))
         
     def correctIndex(self):
         '''If no word remains in wordList, call allWordsFinished().
@@ -308,53 +308,53 @@ You also can import an archived file to start another reviewing.''')
     def _createActions(self):
         self.configAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/config.png"),
-            "&Configuration", self,
+            self.tr("&Configuration"), self,
             shortcut = QtGui.QKeySequence("Ctrl+P"),
-            statusTip = "Open configuration window.",
+            statusTip = self.tr("Open configuration window."),
             triggered = self.openConfigWindow
         )
         self.openArchiveFileManagerAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/star.png"),
-            "&Manage", self,
+            self.tr("&Manage"), self,
             shortcut = QtGui.QKeySequence("Ctrl+M"),
-            statusTip = "Create, import, rename, edit, delete archive file.",
+            statusTip = self.tr("Create, import, rename, edit, delete archive file."),
             triggered = self.openArchiveFileManager
         )
         self.openHelpWindowAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/help.png"),
-            "&Help", self,
+            self.tr("&Help"), self,
             shortcut = QtGui.QKeySequence.HelpContents,
-            statusTip = "Open help window.",
+            statusTip = self.tr("Open help window."),
             triggered = self.openHelpWindow
         )
         self.archiveDictAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/archive.png"),
-            "&Archive Whole Dict", self,
-            statusTip = "Archive all words in dict, then you can import the other archive file.",
+            self.tr("&Archive Whole Dict"), self,
+            statusTip = self.tr("Archive all words in dict, then you can import the other archive file."),
             triggered = self.archiveDict
         )
         self.openDictFileAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/edit.png"),
-            "&Open Dict File", self,
-            statusTip = "Open Dict file with system default editor.",
+            self.tr("&Open Dict File"), self,
+            statusTip = self.tr("Open Dict file with system default editor."),
             triggered = self.openDictFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/browse.png"),
-            "&Open Archive Directory", self,
-            statusTip = "Open archive directory with external file manager.",
+            self.tr("&Open Archive Directory"), self,
+            statusTip = self.tr("Open archive directory with external file manager."),
             triggered = self.openArchiveDirectory
         )
 
     def _createMenus(self):
-        self.menu_bar = self.menuBar().addMenu("&File")
+        self.menu_bar = self.menuBar().addMenu(self.tr("&File"))
         self.menu_bar.addAction(self.openDictFileAct)
         self.menu_bar.addAction(self.configAct)
-        self.menu_bar = self.menuBar().addMenu("&Archive")
+        self.menu_bar = self.menuBar().addMenu(self.tr("&Archive"))
         self.menu_bar.addAction(self.openArchiveFileManagerAct)
         self.menu_bar.addAction(self.archiveDictAct)
         self.menu_bar.addAction(self.openArchiveDirectoryAct)
-        self.menu_bar = self.menuBar().addMenu("&Help")
+        self.menu_bar = self.menuBar().addMenu(self.tr("&Help"))
         self.menu_bar.addAction(self.openHelpWindowAct)
         
 
@@ -375,14 +375,13 @@ class ArchiveList(QtGui.QDialog):
         button_box.rejected.connect(self.close)
         
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(QtGui.QLabel("Please input filename for archiving the dict,\n"
-                                      "or select an existed one:"))
+        layout.addWidget(QtGui.QLabel(self.tr("Please input filename for archiving the dict,\nor select an existed one:")))
         layout.addWidget(self.line_edit)
         layout.addWidget(list_widget)
         layout.addWidget(button_box)
 
         self.setLayout(layout)
-        self.setWindowTitle("Input archive file")
+        self.setWindowTitle(self.tr("Input archive file"))
         
     def setLineEditText(self, item):
         self.line_edit.setText(item.text())
@@ -391,8 +390,8 @@ class ArchiveList(QtGui.QDialog):
         filename = self.line_edit.text()
         if filename in os.listdir(ARCHIVE_DIR):
             reply = QtGui.QMessageBox.question(
-                self, 'Message',
-                "Are you sure to overwrite file <b>{0}</b>?".format(filename),
+                self, self.tr('Message'),
+                self.tr("Are you sure to overwrite file <b>{0}</b>?").format(filename),
                 QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
             if reply == QtGui.QMessageBox.Yes:
                 self.parent.io.archiveWholeDict(filename)
@@ -417,10 +416,10 @@ class ConfigWindow(QtGui.QDialog):
         button_box.rejected.connect(self.close)
         
         layout = QtGui.QGridLayout()
-        layout.addWidget(QtGui.QLabel("Dict file path:"), 0, 0)
+        layout.addWidget(QtGui.QLabel(self.tr("Dict file path:")), 0, 0)
         layout.addWidget(self.line_dict_path, 0, 1)
         layout.addWidget(button_dict_path, 0, 2)
-        layout.addWidget(QtGui.QLabel("Memorized count:"), 1, 0)
+        layout.addWidget(QtGui.QLabel(self.tr("Memorized count:")), 1, 0)
         layout.addWidget(self.spin_box, 1, 1, 1, 1)
         layout.addWidget(button_box, 2, 1, 1, 2)
 
@@ -429,7 +428,7 @@ class ConfigWindow(QtGui.QDialog):
         self.resize(700, self.height())
 
     def browseDictPath(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Select Dictionary File Path",
+        path = QtGui.QFileDialog.getOpenFileName(self, self.tr("Select Dictionary File Path"),
                                                  os.path.expanduser("~/"))
         if path:
             self.line_dict_path.setText(path)
@@ -447,7 +446,9 @@ class ArchiveFileManager(QtGui.QDialog):
         super().__init__(parent)
         self.parent = parent
         self.tree = QtGui.QTreeWidget()
-        self.tree.setHeaderLabels(["Current", "Filename", "Words"])
+        self.tree.setHeaderLabels([self.tr("Current"),
+                                   self.tr("Filename"),
+                                   self.tr("Words")])
 
         self.reloadArchiveFiles()
         
@@ -559,14 +560,14 @@ class ArchiveFileManager(QtGui.QDialog):
             
     def new(self):
         filename, ok = QtGui.QInputDialog.getText(self,
-                                                  "Create a new archive",
-                                                  "Please input a name for new archive file :",
+                                                  self.tr("Create a new archive"),
+                                                  self.tr("Please input a name for new archive file :"),
                                                   QtGui.QLineEdit.Normal,
                                                   self.userInput)
         if ok and filename != '':
             if filename in os.listdir(ARCHIVE_DIR):
                 msg = QtGui.QMessageBox()
-                msg.setText("Filename has already existed, please retry.")
+                msg.setText(self.tr("Filename has already existed, please retry."))
                 msg.setIcon(QtGui.QMessageBox.Information)
                 msg.exec_()
                 self.userInput = filename
@@ -584,14 +585,14 @@ class ArchiveFileManager(QtGui.QDialog):
             return None
         oldFilename = self.tree.currentItem().data(1, 0)
         newFilename, ok = QtGui.QInputDialog.getText(self,
-                                                     "Rename the archive file",
-                                                     "Please input a new name for this archive file :",
+                                                     self.tr("Rename the archive file"),
+                                                     self.tr("Please input a new name for this archive file :"),
                                                      QtGui.QLineEdit.Normal,
                                                      oldFilename)
         if ok and newFilename != '':
             if newFilename in os.listdir(ARCHIVE_DIR):
                 msg = QtGui.QMessageBox()
-                msg.setText("Filename has already existed, please retry.")
+                msg.setText(self.tr("Filename has already existed, please retry."))
                 msg.setIcon(QtGui.QMessageBox.Information)
                 msg.exec_()
                 self.rename()
@@ -610,7 +611,7 @@ class ArchiveFileManager(QtGui.QDialog):
         if len(self.tree.selectedItems()) <= 1:
             msg = QtGui.QMessageBox()
             msg.setIcon(QtGui.QMessageBox.Information)
-            msg.setText("Please press Ctrl and click to select multiple items first.")
+            msg.setText(self.tr("Please press Ctrl and click to select multiple items first."))
             msg.exec_()
         else:
             filenameList = []
@@ -622,12 +623,13 @@ class ArchiveFileManager(QtGui.QDialog):
                 formatedFilenameList = formatedFilenameList + "<li><i>{0}</i></li>".format(filename)
                 
             mergedFilename, ok = QtGui.QInputDialog.getText(self,
-                                                         "Merge",
+                                                         self.tr("Merge"),
+                                                            self.tr(
 """You are about merging the following files:<br>
 <ol>{0}</ol>
 Please input new file name for merged file:
 (You cannot use an existed file name)
-""".format(formatedFilenameList),
+""").format(formatedFilenameList),
                                                          QtGui.QLineEdit.Normal,
                                                          filenameList[0])
             # Merge file
@@ -635,7 +637,7 @@ Please input new file name for merged file:
                 if mergedFilename in os.listdir(ARCHIVE_DIR):
                     msg = QtGui.QMessageBox()
                     msg.setIcon(QtGui.QMessageBox.Information)
-                    msg.setText("Filename has existed, please input another one.")
+                    msg.setText(self.tr("Filename has existed, please input another one."))
                     msg.exec_()
                     self.merge()
                 else:
@@ -647,7 +649,7 @@ Please input new file name for merged file:
                     self.reloadArchiveFiles()
                     msg = QtGui.QMessageBox()
                     msg.setIcon(QtGui.QMessageBox.Information)
-                    msg.setText("File merged!")
+                    msg.setText(self.tr("File merged!"))
                     msg.exec_()
 
     def removeDuplicated(self):
@@ -655,9 +657,10 @@ Please input new file name for merged file:
         if selected_item == None:
             return None         # Jump out of function
         filename = selected_item.data(1, 0)
-        reply = QtGui.QMessageBox.question(self, 'Message',
+        reply = QtGui.QMessageBox.question(self, self.tr('Message'),
+                                           self.tr(
 """This action will remove all duplicated words in <b>{0}</b>.<br>
-This action cannot be undone, continue?""".format(filename),
+This action cannot be undone, continue?""").format(filename),
                                            QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         
         if reply == QtGui.QMessageBox.No:
@@ -679,24 +682,24 @@ This action cannot be undone, continue?""".format(filename),
             file.writelines(newLinesList)
         self.reloadArchiveFiles()
         msg = QtGui.QMessageBox()
-        msg.setWindowTitle('Remove Duplicated')
+        msg.setWindowTitle(self.tr('Remove Duplicated Words'))
         msg.setIcon(QtGui.QMessageBox.Information)
-        msg.setText('Done! {0} duplicated word removed.'.format(duplicatedCount))
+        msg.setText(self.tr('Done! {0} duplicated word removed.').format(duplicatedCount))
         msg.exec_()
             
     def delete(self):
         if len(os.listdir(ARCHIVE_DIR)) <= 1:
             msg = QtGui.QMessageBox()
             msg.setIcon(QtGui.QMessageBox.Information)
-            msg.setText("You have to reserve at least one archive file.")
+            msg.setText(self.tr("You have to reserve at least one archive file."))
             msg.exec_()
         else:
 
             if self.tree.currentItem():
                 filename = self.tree.currentItem().data(1, 0)
-                reply = QtGui.QMessageBox.question(self, 'Message',
-                                                   """Are you sure to delete <b>{0}</b>?<br>
-                                                   (This action cannot be undone!)""".format(filename),
+                reply = QtGui.QMessageBox.question(self, self.tr('Message'),
+                                                   self.tr("""Are you sure to delete <b>{0}</b>?<br>
+                                                   (This action cannot be undone!)""").format(filename),
                                                    QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
     
                 if reply == QtGui.QMessageBox.Yes:
@@ -709,15 +712,15 @@ This action cannot be undone, continue?""".format(filename),
             return None         # Jump out of function
         filename = selectedItem.data(1, 0)
         words = str(selectedItem.data(2, 0))
-        reply = QtGui.QMessageBox.question(self, 'Message',
-             "Are you sure to import <b>{0} ({1} words)</b>?".format(filename, words),
+        reply = QtGui.QMessageBox.question(self, self.tr('Message'),
+             self.tr("Are you sure to import <b>{0} ({1} words)</b>?").format(filename, words),
              QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             
             self.parent.io.importArchivedFile(filename)
             msg = QtGui.QMessageBox()
             msg.setIcon(QtGui.QMessageBox.Information)
-            msg.setText("Done! {0} words imported.".format(words))
+            msg.setText(self.tr("Done! {0} words imported.").format(words))
             msg.exec_()
             self.parent.refresh() # parent should be main window
         
@@ -729,6 +732,7 @@ class HelpWindow(QtGui.QDialog):
         text_browser.setStyleSheet("font-size:12px;")
         text_browser.setOpenExternalLinks(True)
         text_browser.setHtml(
+            self.tr(
 '''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
 You can add new word into flashcard via Stardict with <b style='background-color: #ddd; color: #333;'>Alt+e</b>.<br>
@@ -748,14 +752,14 @@ If you still have problem, you can visit our <a href="http://www.github.com/kuan
 <h2> Contribution </h2>
 Stardict Flashcard is a free software. So if you wish, your contribution is always welcome! Visit <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> to see how to.
 
-''')
+'''))
         button = QtGui.QPushButton("&Ok")
         button.clicked.connect(self.close)
         button.setDefault(True)
         button.setAutoDefault(True)
         button_box = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
         button_box.accepted.connect(self.close)
-        label = QtGui.QLabel("Thanks for using Stardict Flashcard!")
+        label = QtGui.QLabel(self.tr("Thanks for using Stardict Flashcard!"))
         main_layout = QtGui.QVBoxLayout()
         main_layout.addWidget(label)
         main_layout.addWidget(text_browser)
@@ -771,6 +775,8 @@ Stardict Flashcard is a free software. So if you wish, your contribution is alwa
 
         
 app = QtGui.QApplication(sys.argv)
+
+# Icon
 app_icon = QtGui.QIcon()
 app_icon.addFile('icons/16.png', QtCore.QSize(16,16))
 app_icon.addFile('icons/22.png', QtCore.QSize(22,22))
@@ -779,6 +785,12 @@ app_icon.addFile('icons/48.png', QtCore.QSize(48,48))
 app_icon.addFile('icons/256.png', QtCore.QSize(256,256))
 app.setWindowIcon(app_icon)
 
+# Internationalization
+translator = QtCore.QTranslator()    
+translator.load("translate/zh_TW.qm")    
+app.installTranslator(translator)
+
 main_window = MainWindow()
+
 
 app.exec_()
