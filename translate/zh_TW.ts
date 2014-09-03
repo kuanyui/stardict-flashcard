@@ -84,7 +84,7 @@ Please input new file name for merged file:
         <location filename="stardict-flashcard.py" line="660"/>
         <source>This action will remove all duplicated words in &lt;b&gt;{0}&lt;/b&gt;.&lt;br&gt;
 This action cannot be undone, continue?</source>
-        <translation>這個動作將會移除 &lt;b&gt;{0}&lt;/b&gt;.中所有重複的字詞。&lt;br&gt;
+        <translation>這個動作將會移除 &lt;b&gt;{0}&lt;/b&gt;中所有重複的字詞。&lt;br&gt;
 這個動作無法復原，繼續嗎?</translation>
     </message>
     <message>
