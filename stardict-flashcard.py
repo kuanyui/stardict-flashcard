@@ -123,6 +123,17 @@ class FileIO():
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL)
 
+class IconButton(QtGui.QPushButton):
+    def __init__(self, align, iconFilename, text, function):
+        super().__init__()
+        self.setIcon(QtGui.QIcon("icons/actions/" + iconFilename))
+        self.setText(text)
+        if align == 'l':
+            self.setStyleSheet("text-align:left")
+        elif align == 'r':
+            self.setStyleSheet("text-align:right")
+        self.clicked.connect(function)
+        
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
@@ -390,9 +401,7 @@ class ConfigWindow(QtGui.QDialog):
         self.parent = parent
         self.line_dict_path = QtGui.QLineEdit()
         self.line_dict_path.setText(DICT_PATH)
-        button_dict_path = QtGui.QPushButton("Browse Dict...")
-        button_dict_path.clicked.connect(self.browseDictPath)
-        
+        button_dict_path = IconButton('c', 'browse.png', '&Browse...', self.browseDictPath)
         self.spin_box = QtGui.QSpinBox()
         self.spin_box.setRange(1, 100)
         self.spin_box.setValue(MEMORIZED_COUNT)
@@ -445,24 +454,15 @@ class ArchiveFileManager(QtGui.QDialog):
         self.tree.itemClicked.connect(self.updateButtonState)
         
         # buttons
-        self.b_new              = QtGui.QPushButton("&New")
-        self.b_new.clicked.connect(self.new)
-        self.b_rename           = QtGui.QPushButton("&Rename")
-        self.b_rename.clicked.connect(self.rename)
-        self.b_edit             = QtGui.QPushButton("&Edit")
-        self.b_edit.clicked.connect(self.edit)
-        self.b_merge            = QtGui.QPushButton("&Merge")
-        self.b_merge.clicked.connect(self.merge)
-        self.b_delete           = QtGui.QPushButton("&Delete")
-        self.b_delete.clicked.connect(self.delete)
-        self.b_remove_duplicate = QtGui.QPushButton("Remove Duplicated")
-        self.b_remove_duplicate.clicked.connect(self.removeDuplicated)
-        self.b_import_to_dict   = QtGui.QPushButton("&Import to Dict")
-        self.b_import_to_dict.clicked.connect(self.importToDict)
-        self.b_set_as_default   = QtGui.QPushButton("&Set As Default\nArchive File")
-        self.b_set_as_default.clicked.connect(self.setAsDefault)
-        close                   = QtGui.QPushButton("&Close")
-        close.clicked.connect(self.close)
+        self.b_new              = IconButton('l', 'new.png', '&New', self.new)
+        self.b_rename           = IconButton('l', 'rename.png', '&Rename', self.rename)
+        self.b_edit             = IconButton('l', 'edit.png', '&Edit', self.edit)
+        self.b_merge            = IconButton('l', 'merge.png', '&Merge', self.merge)
+        self.b_delete           = IconButton('l', 'delete.png', '&Delete', self.delete)
+        self.b_remove_duplicate = IconButton('l', 'remove_duplicated.png', 'Remove Duplicated', self.removeDuplicated)
+        self.b_import_to_dict   = IconButton('l', 'import.png', '&Import to Dict', self.importToDict)
+        self.b_set_as_default   = IconButton('l', 'star.png', '&Set As Current', self.setAsDefault)
+        close                   = IconButton('l', 'exit.png', '&Close', self.close)
 
         
         button_layout = QtGui.QVBoxLayout()
