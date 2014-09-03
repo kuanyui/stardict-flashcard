@@ -657,7 +657,7 @@ Please input new file name for merged file:
         if selected_item == None:
             return None         # Jump out of function
         filename = selected_item.data(1, 0)
-        reply = QtGui.QMessageBox.question(self, self.tr('Message'),
+        reply = QtGui.QMessageBox.question(self, self.tr('Remove Duplicated Words'),
                                            self.tr(
 """This action will remove all duplicated words in <b>{0}</b>.<br>
 This action cannot be undone, continue?""").format(filename),
@@ -697,7 +697,7 @@ This action cannot be undone, continue?""").format(filename),
 
             if self.tree.currentItem():
                 filename = self.tree.currentItem().data(1, 0)
-                reply = QtGui.QMessageBox.question(self, self.tr('Message'),
+                reply = QtGui.QMessageBox.question(self, self.tr('Delete File'),
                                                    self.tr("""Are you sure to delete <b>{0}</b>?<br>
                                                    (This action cannot be undone!)""").format(filename),
                                                    QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
@@ -786,8 +786,8 @@ app_icon.addFile('icons/256.png', QtCore.QSize(256,256))
 app.setWindowIcon(app_icon)
 
 # Internationalization
-translator = QtCore.QTranslator()    
-translator.load("translate/zh_TW.qm")    
+translator = QtCore.QTranslator()
+translator.load("translate/zh_TW.qm")
 app.installTranslator(translator)
 
 main_window = MainWindow()
