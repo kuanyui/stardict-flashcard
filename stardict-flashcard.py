@@ -56,7 +56,7 @@ class FileIO():
         self.linePattern=re.compile(r'([^\t]+)\t([0-9]+)\n')
 
     def initializeFile(self):
-        '''Read dict file and add count numbers, and read into self.lineList,
+        '''Read Flashcard file and add count numbers, and read into self.lineList,
         then parsed into self.wordList.'''
         with open(DICT_PATH, 'r') as file:
             lineList = file.readlines()
@@ -110,7 +110,7 @@ class FileIO():
             wholeDictContent = file.read()
         with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'w') as file:
             file.write(wholeDictContent)
-        # Clear dict file.
+        # Clear Dict file.
         self.wordList = []
         self.formatWordListAndWriteIntoFile()
         
@@ -232,7 +232,7 @@ class MainWindow(QtGui.QMainWindow):
         self.now = None
         self.archiveDictAct.setEnabled(False)
         self.word_label.setText("Cleared!")
-        self.description_browser.setText(self.tr('''No word remains in dict file now.
+        self.description_browser.setText(self.tr('''No word remains in Flashcard file now.
 Now you can add new word via StarDict (Alt + e).
 You also can import an archived file to start another reviewing.'''))
         
@@ -281,7 +281,7 @@ You also can import an archived file to start another reviewing.'''))
         self.io.formatWordListAndWriteIntoFile()
 
     def archiveDict(self):
-        '''Archive all words in dict.'''
+        '''Archive all words in Flashcard.'''
         self.archive_list = ArchiveList(self)
         self.archive_list.show()
     
@@ -329,14 +329,14 @@ You also can import an archived file to start another reviewing.'''))
         )
         self.archiveDictAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/archive.png"),
-            self.tr("&Archive Whole Dict"), self,
-            statusTip = self.tr("Archive all words in dict, then you can import the other archive file."),
+            self.tr("&Archive Whole Flashcard"), self,
+            statusTip = self.tr("Archive all words in Flashcard, then you can import the other archive file."),
             triggered = self.archiveDict
         )
         self.openDictFileAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/edit.png"),
-            self.tr("&Open Dict File"), self,
-            statusTip = self.tr("Open Dict file with system default editor."),
+            self.tr("&Open Flashcard File"), self,
+            statusTip = self.tr("Open Flashcard file with system default editor."),
             triggered = self.openDictFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
@@ -375,7 +375,7 @@ class ArchiveList(QtGui.QDialog):
         button_box.rejected.connect(self.close)
         
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(QtGui.QLabel(self.tr("Please input filename for archiving the dict,\nor select an existed one:")))
+        layout.addWidget(QtGui.QLabel(self.tr("Please input filename for archiving the Flashcard,\nor select an existed one:")))
         layout.addWidget(self.line_edit)
         layout.addWidget(list_widget)
         layout.addWidget(button_box)
@@ -416,7 +416,7 @@ class ConfigWindow(QtGui.QDialog):
         button_box.rejected.connect(self.close)
         
         layout = QtGui.QGridLayout()
-        layout.addWidget(QtGui.QLabel(self.tr("Dict file path:")), 0, 0)
+        layout.addWidget(QtGui.QLabel(self.tr("Flashcard file path:")), 0, 0)
         layout.addWidget(self.line_dict_path, 0, 1)
         layout.addWidget(button_dict_path, 0, 2)
         layout.addWidget(QtGui.QLabel(self.tr("Memorized count:")), 1, 0)
@@ -428,7 +428,7 @@ class ConfigWindow(QtGui.QDialog):
         self.resize(700, self.height())
 
     def browseDictPath(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, self.tr("Select Dictionary File Path"),
+        path = QtGui.QFileDialog.getOpenFileName(self, self.tr("Select Flashcard File Path"),
                                                  os.path.expanduser("~/"))
         if path:
             self.line_dict_path.setText(path)
@@ -467,7 +467,7 @@ class ArchiveFileManager(QtGui.QDialog):
         self.b_merge            = IconButton('l', 'merge.png', self.tr('&Merge'), self.merge)
         self.b_delete           = IconButton('l', 'delete.png', self.tr('&Delete'), self.delete)
         self.b_remove_duplicate = IconButton('l', 'remove_duplicated.png', self.tr('Remove Duplicated'), self.removeDuplicated)
-        self.b_import_to_dict   = IconButton('l', 'import.png', self.tr('&Import to Dict'), self.importToDict)
+        self.b_import_to_dict   = IconButton('l', 'import.png', self.tr('&Import to Flashcard'), self.importToDict)
         self.b_set_as_default   = IconButton('l', 'star.png', self.tr('&Set As Current'), self.setAsDefault)
         close                   = IconButton('l', 'exit.png', self.tr('&Close'), self.close)
 
@@ -735,7 +735,7 @@ class HelpWindow(QtGui.QDialog):
             self.tr(
 '''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
-You can add new word into flashcard via Stardict with <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Alt+e </span>.<br>
+You can add new word into Flashcard's dict via Stardict with <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Alt+e </span>.<br>
 (The words will be added into <i>~/dic.txt</i> by default)<by>
 Then open <i>Stardict Flashcard</i>:
 <ol>
