@@ -721,6 +721,7 @@ class HelpWindow(QtGui.QDialog):
         super().__init__(parent)
         text_browser = QtGui.QTextBrowser()
         text_browser.setStyleSheet("font-size:12px;")
+        text_browser.setOpenExternalLinks(True)
         text_browser.setHtml(
 '''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
@@ -736,6 +737,11 @@ Then open <i>Stardict Flashcard</i>:
 
 After finishing all words, you still can review them again by <b>importing archive file</b>.<br>
 You can manage archive file in <i>File/Manage Archive File</i>.
+<h2> Need Help? </h2>
+If you still have problem, you can visit our <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> and open an issue.
+<h2> Contribution </h2>
+Stardict Flashcard is a free software. So if you wish, your contribution is always welcome! Visit <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> to see how to.
+
 ''')
         button = QtGui.QPushButton("&Ok")
         button.clicked.connect(self.close)
@@ -743,8 +749,9 @@ You can manage archive file in <i>File/Manage Archive File</i>.
         button.setAutoDefault(True)
         button_box = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
         button_box.accepted.connect(self.close)
-
+        label = QtGui.QLabel("Thanks for using Stardict Flashcard!")
         main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(label)
         main_layout.addWidget(text_browser)
         main_layout.addWidget(button_box)
 
