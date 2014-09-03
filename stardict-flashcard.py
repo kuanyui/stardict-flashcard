@@ -1,7 +1,7 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys, os, math, re, configparser, subprocess
 from PyQt4 import QtCore, QtGui
-
 ROOT = os.path.expanduser('~/.stardict-flashcard/')
 CONFIG_PATH = os.path.join(ROOT, 'rc.ini')
 ARCHIVE_DIR = os.path.join(ROOT, 'archive')
@@ -785,9 +785,14 @@ app_icon.addFile('icons/48.png', QtCore.QSize(48,48))
 app_icon.addFile('icons/256.png', QtCore.QSize(256,256))
 app.setWindowIcon(app_icon)
 
+LOCALE = QtCore.QLocale.system().name()
 # Internationalization
 translator = QtCore.QTranslator()
-translator.load("translate/zh_TW.qm")
+if translator.load(LOCALE + '.qm', 'translate'): # name, dir
+    print('Found localization file for ' + LOCALE)
+else:
+    print('Not found localization file for ' + LOCALE)
+
 app.installTranslator(translator)
 
 main_window = MainWindow()
