@@ -735,13 +735,13 @@ class HelpWindow(QtGui.QDialog):
             self.tr(
 '''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
-You can add new word into flashcard via Stardict with <b style='background-color: #ddd; color: #333;'>Alt+e</b>.<br>
+You can add new word into flashcard via Stardict with <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Alt+e </span>.<br>
 (The words will be added into <i>~/dic.txt</i> by default)<by>
 Then open <i>Stardict Flashcard</i>:
 <ol>
 <li>Press <b>Space</b> to display answer.</li>
-<li>Then press <b>Enter</b> means you can recite this word.</li>
-<li>Or if you can't think of the word and recite it, press <b>Space</b> to go on instead.</li>
+<li>Then press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Enter </span> means you can recite this word.</li>
+<li>Or if you can't think of the word and recite it, press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Space </span> to go on instead.</li>
 <li>After a word can be recited up to 5 times, the word will be archived into current archive file automatically.<li>
 </ol>
 
