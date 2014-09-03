@@ -307,34 +307,40 @@ You also can import an archived file to start another reviewing.''')
 
     def _createActions(self):
         self.configAct = QtGui.QAction(
+            QtGui.QIcon("icons/actions/config.png"),
             "&Configuration", self,
             shortcut = QtGui.QKeySequence("Ctrl+P"),
             statusTip = "Open configuration window.",
             triggered = self.openConfigWindow
         )
         self.openArchiveFileManagerAct = QtGui.QAction(
+            QtGui.QIcon("icons/actions/star.png"),
             "&Manage", self,
             shortcut = QtGui.QKeySequence("Ctrl+M"),
             statusTip = "Create, import, rename, edit, delete archive file.",
             triggered = self.openArchiveFileManager
         )
         self.openHelpWindowAct = QtGui.QAction(
+            QtGui.QIcon("icons/actions/help.png"),
             "&Help", self,
             shortcut = QtGui.QKeySequence.HelpContents,
             statusTip = "Open help window.",
             triggered = self.openHelpWindow
         )
         self.archiveDictAct = QtGui.QAction(
+            QtGui.QIcon("icons/actions/archive.png"),
             "&Archive Whole Dict", self,
             statusTip = "Archive all words in dict, then you can import the other archive file.",
             triggered = self.archiveDict
         )
         self.openDictFileAct = QtGui.QAction(
+            QtGui.QIcon("icons/actions/edit.png"),
             "&Open Dict File", self,
             statusTip = "Open Dict file with system default editor.",
             triggered = self.openDictFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
+            QtGui.QIcon("icons/actions/browse.png"),
             "&Open Archive Directory", self,
             statusTip = "Open archive directory with external file manager.",
             triggered = self.openArchiveDirectory
