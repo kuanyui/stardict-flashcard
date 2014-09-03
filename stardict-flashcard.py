@@ -17,7 +17,7 @@ class ConfigFile():
             OPEN_FIRST_TIME_HELP = True
             with open(CONFIG_PATH, 'w') as file:
                 file.write('''[Path]
-DictPath = ~/dic.txt
+FlashcardPath = ~/dic.txt
 ArchiveFileName = default-archive
 
 [Main]
@@ -32,8 +32,8 @@ FirstTimeHelp = True
         self.parser.read(CONFIG_PATH)
         
     def initializeGlobalVar(self):
-        global DICT_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
-        DICT_PATH             = os.path.expanduser(self.parser['Path']['DictPath'])
+        global FLASHCARD_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
+        FLASHCARD_PATH             = os.path.expanduser(self.parser['Path']['FlashcardPath'])
         ARCHIVE_FILE_NAME     = self.parser['Path']['ArchiveFileName']
         ARCHIVE_FILE_FULLNAME = os.path.join(ARCHIVE_DIR, ARCHIVE_FILE_NAME)
         MEMORIZED_COUNT       = int(self.parser['Main']['MemorizedCount'])
@@ -45,7 +45,7 @@ FirstTimeHelp = True
 
 
     def writeConfigFile(self):
-        self.parser['Path']['DictPath']           = DICT_PATH
+        self.parser['Path']['FlashcardPath']           = FLASHCARD_PATH
         self.parser['Path']['ArchiveFileName']    = ARCHIVE_FILE_NAME
         self.parser['Main']['MemorizedCount']     = str(MEMORIZED_COUNT)
         with open(CONFIG_PATH, 'w') as file:
@@ -58,7 +58,7 @@ class FileIO():
     def initializeFile(self):
         '''Read Flashcard file and add count numbers, and read into self.lineList,
         then parsed into self.wordList.'''
-        with open(DICT_PATH, 'r') as file:
+        with open(FLASHCARD_PATH, 'r') as file:
             lineList = file.readlines()
         # Check each line in dict file if count num exist. if not, add it.
         for index, line in enumerate(lineList):
@@ -70,7 +70,7 @@ class FileIO():
         self.readFileIntoWordList()
 
     def _writeLineListIntoFile(self):
-        with open(DICT_PATH, 'w') as file:
+        with open(FLASHCARD_PATH, 'w') as file:
             file.writelines(self.lineList)
 
     def readFileIntoWordList(self):
@@ -101,16 +101,16 @@ class FileIO():
     def importArchivedFile(self, archiveFilename):
         with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'r') as archiveFile:
             archive_content = archiveFile.read() # [FIXME] May I must to use self in here?
-        with open(DICT_PATH, 'a') as dictFile:
+        with open(FLASHCARD_PATH, 'a') as dictFile:
             dictFile.write(archive_content)
         self.initializeFile()
 
-    def archiveWholeDict(self, archiveFilename):
-        with open(DICT_PATH, 'r') as file:
-            wholeDictContent = file.read()
+    def archiveWholeFlashcard(self, archiveFilename):
+        with open(FLASHCARD_PATH, 'r') as file:
+            wholeFlashcardContent = file.read()
         with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'w') as file:
-            file.write(wholeDictContent)
-        # Clear Dict file.
+            file.write(wholeFlashcardContent)
+        # Clear Flashcard file.
         self.wordList = []
         self.formatWordListAndWriteIntoFile()
         
@@ -196,7 +196,7 @@ class MainWindow(QtGui.QMainWindow):
             self.allWordsFinished()
             return None         # jump out of function
         else:
-            self.archiveDictAct.setEnabled(True)
+            self.archiveFlashcardAct.setEnabled(True)
         if self.io.wordList[self.index][1] >= MEMORIZED_COUNT:
             self.archiveCurrentWord()
         else:
@@ -230,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def allWordsFinished(self):
         self.now = None
-        self.archiveDictAct.setEnabled(False)
+        self.archiveFlashcardAct.setEnabled(False)
         self.word_label.setText("Cleared!")
         self.description_browser.setText(self.tr('''No word remains in Flashcard file now.
 Now you can add new word via StarDict (Alt + e).
@@ -280,7 +280,7 @@ You also can import an archived file to start another reviewing.'''))
     def closeEvent(self, event):
         self.io.formatWordListAndWriteIntoFile()
 
-    def archiveDict(self):
+    def archiveFlashcard(self):
         '''Archive all words in Flashcard.'''
         self.archive_list = ArchiveList(self)
         self.archive_list.show()
@@ -300,8 +300,8 @@ You also can import an archived file to start another reviewing.'''))
     def openArchiveDirectory(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(ARCHIVE_DIR))
 
-    def openDictFile(self):
-        FileIO().editWithSystemEditor(DICT_PATH)
+    def openFlashcardFile(self):
+        FileIO().editWithSystemEditor(FLASHCARD_PATH)
         self.io.initializeFile()
         self.refresh()
 
@@ -327,17 +327,17 @@ You also can import an archived file to start another reviewing.'''))
             statusTip = self.tr("Open help window."),
             triggered = self.openHelpWindow
         )
-        self.archiveDictAct = QtGui.QAction(
+        self.archiveFlashcardAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/archive.png"),
             self.tr("&Archive Whole Flashcard"), self,
             statusTip = self.tr("Archive all words in Flashcard, then you can import the other archive file."),
-            triggered = self.archiveDict
+            triggered = self.archiveFlashcard
         )
-        self.openDictFileAct = QtGui.QAction(
+        self.openFlashcardFileAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/edit.png"),
             self.tr("&Open Flashcard File"), self,
             statusTip = self.tr("Open Flashcard file with system default editor."),
-            triggered = self.openDictFile
+            triggered = self.openFlashcardFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
             QtGui.QIcon("icons/actions/browse.png"),
@@ -348,11 +348,11 @@ You also can import an archived file to start another reviewing.'''))
 
     def _createMenus(self):
         self.menu_bar = self.menuBar().addMenu(self.tr("&File"))
-        self.menu_bar.addAction(self.openDictFileAct)
+        self.menu_bar.addAction(self.openFlashcardFileAct)
         self.menu_bar.addAction(self.configAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Archive"))
         self.menu_bar.addAction(self.openArchiveFileManagerAct)
-        self.menu_bar.addAction(self.archiveDictAct)
+        self.menu_bar.addAction(self.archiveFlashcardAct)
         self.menu_bar.addAction(self.openArchiveDirectoryAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Help"))
         self.menu_bar.addAction(self.openHelpWindowAct)
@@ -375,7 +375,7 @@ class ArchiveList(QtGui.QDialog):
         button_box.rejected.connect(self.close)
         
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(QtGui.QLabel(self.tr("Please input filename for archiving the Flashcard,\nor select an existed one:")))
+        layout.addWidget(QtGui.QLabel(self.tr("Please input filename for archiving Flashcard,\nor select an existed one:")))
         layout.addWidget(self.line_edit)
         layout.addWidget(list_widget)
         layout.addWidget(button_box)
@@ -394,7 +394,7 @@ class ArchiveList(QtGui.QDialog):
                 self.tr("Are you sure to overwrite file <b>{0}</b>?").format(filename),
                 QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
             if reply == QtGui.QMessageBox.Yes:
-                self.parent.io.archiveWholeDict(filename)
+                self.parent.io.archiveWholeFlashcard(filename)
                 self.parent.allWordsFinished()
                 self.parent.openArchiveFileManager()
                 self.close()
@@ -405,8 +405,8 @@ class ConfigWindow(QtGui.QDialog):
         super().__init__(parent)
         self.parent = parent
         self.line_dict_path = QtGui.QLineEdit()
-        self.line_dict_path.setText(DICT_PATH)
-        button_dict_path = IconButton('c', 'browse.png', '&Browse...', self.browseDictPath)
+        self.line_dict_path.setText(FLASHCARD_PATH)
+        button_dict_path = IconButton('c', 'browse.png', '&Browse...', self.browseFlashcardPath)
         self.spin_box = QtGui.QSpinBox()
         self.spin_box.setRange(1, 100)
         self.spin_box.setValue(MEMORIZED_COUNT)
@@ -427,15 +427,15 @@ class ConfigWindow(QtGui.QDialog):
         self.adjustSize()
         self.resize(700, self.height())
 
-    def browseDictPath(self):
+    def browseFlashcardPath(self):
         path = QtGui.QFileDialog.getOpenFileName(self, self.tr("Select Flashcard File Path"),
                                                  os.path.expanduser("~/"))
         if path:
             self.line_dict_path.setText(path)
 
     def applyAndWriteConfigFile(self):
-        global DICT_PATH, MEMORIZED_COUNT
-        DICT_PATH             = str(self.line_dict_path.text())
+        global FLASHCARD_PATH, MEMORIZED_COUNT
+        FLASHCARD_PATH             = str(self.line_dict_path.text())
         MEMORIZED_COUNT       = int(self.spin_box.value())
 
         self.parent.config.writeConfigFile()
@@ -467,7 +467,7 @@ class ArchiveFileManager(QtGui.QDialog):
         self.b_merge            = IconButton('l', 'merge.png', self.tr('&Merge'), self.merge)
         self.b_delete           = IconButton('l', 'delete.png', self.tr('&Delete'), self.delete)
         self.b_remove_duplicate = IconButton('l', 'remove_duplicated.png', self.tr('Remove Duplicated'), self.removeDuplicated)
-        self.b_import_to_dict   = IconButton('l', 'import.png', self.tr('&Import to Flashcard'), self.importToDict)
+        self.b_import_to_dict   = IconButton('l', 'import.png', self.tr('&Import to Flashcard'), self.importToFlashcard)
         self.b_set_as_default   = IconButton('l', 'star.png', self.tr('&Set As Current'), self.setAsDefault)
         close                   = IconButton('l', 'exit.png', self.tr('&Close'), self.close)
 
@@ -706,7 +706,7 @@ This action cannot be undone, continue?""").format(filename),
                     os.remove(os.path.join(ARCHIVE_DIR, self.tree.currentItem().data(1, 0)))
                     self.reloadArchiveFiles()
 
-    def importToDict(self):
+    def importToFlashcard(self):
         selectedItem = self.tree.currentItem()
         if selectedItem == None:
             return None         # Jump out of function
@@ -735,25 +735,25 @@ class HelpWindow(QtGui.QDialog):
             self.tr(
 '''
 <h1>Welcome to <i>Stardict Flashcard</i>!</h1>
-You can add new word into Flashcard's dict via Stardict with <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Alt+e </span>.<br>
-(The words will be added into <i>~/dic.txt</i> by default)<by>
-Then open <i>Stardict Flashcard</i>:
+You can add new word into Flashcard file within Stardict with <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Alt+e </span>.<br>
+(The words will be added into <i>~/dic.txt</i> by default, that is just so-called "Flashcard file")<br>
+After adding some word into Flashcard file, it's time to startup <i>Stardict Flashcard</i>:
 <ol>
-<li>Press <b>Space</b> to display answer.</li>
+<li>Press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Space </span> to display answer.</li>
 <li>Then press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Enter </span> means you can recite this word.</li>
 <li>Or if you can't think of the word and recite it, press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Space </span> to go on instead.</li>
 <li>After a word can be recited up to 5 times, the word will be archived into current archive file automatically.<li>
 </ol>
 
-After finishing all words, you still can review them again by <b>importing archive file</b>.<br>
+After finishing all words, you still can review them again by <b>importing archive file</b> back to Flashcard file.<br>
 You can manage archive file in <i>File/Manage Archive File</i>.
 <h2> Need Help? </h2>
-If you still have problem, you can visit our <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> and open an issue.
+If you still have problem, you can visit our <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> and open an issue. (If ok, please use English.)
 <h2> Contribution </h2>
-Stardict Flashcard is a free software. So if you wish, your contribution is always welcome! Visit <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> to see how to.
+Stardict Flashcard is a free software. So if you wish, your contribution is always welcome! Visit <a href="http://www.github.com/kuanyui/stardict-flashcard/">GitHub</a> to see what things can do.
 
 '''))
-        button = QtGui.QPushButton("&Ok")
+        button = QtGui.QPushButton(self.tr("&Ok"))
         button.clicked.connect(self.close)
         button.setDefault(True)
         button.setAutoDefault(True)
