@@ -119,6 +119,51 @@ This action cannot be undone, continue?</source>
         <source>Done! {0} words imported.</source>
         <translation>完成！匯入了 {0} 個單字。</translation>
     </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="464"/>
+        <source>&amp;New</source>
+        <translation>建立(&amp;N)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="465"/>
+        <source>&amp;Rename</source>
+        <translation>重新命名(&amp;R)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="466"/>
+        <source>&amp;Edit</source>
+        <translation>編輯(&amp;E)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="467"/>
+        <source>&amp;Merge</source>
+        <translation>合併(&amp;M)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="468"/>
+        <source>&amp;Delete</source>
+        <translation>刪除(&amp;D)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="469"/>
+        <source>Remove Duplicated</source>
+        <translation>移除重複字詞</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="470"/>
+        <source>&amp;Import to Dict</source>
+        <translation>匯入字典檔(&amp;I)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="471"/>
+        <source>&amp;Set As Current</source>
+        <translation>設為預設(&amp;S)</translation>
+    </message>
+    <message>
+        <location filename="stardict-flashcard.py" line="472"/>
+        <source>&amp;Close</source>
+        <translation>關閉(&amp;C)</translation>
+    </message>
 </context>
 <context>
     <name>ArchiveList</name>

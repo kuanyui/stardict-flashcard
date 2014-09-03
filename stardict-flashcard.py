@@ -127,7 +127,7 @@ class IconButton(QtGui.QPushButton):
     def __init__(self, align, iconFilename, text, function):
         super().__init__()
         self.setIcon(QtGui.QIcon("icons/actions/" + iconFilename))
-        self.setText(self.tr(text))
+        self.setText(text)
         if align == 'l':
             self.setStyleSheet("text-align:left")
         elif align == 'r':
@@ -461,15 +461,15 @@ class ArchiveFileManager(QtGui.QDialog):
         self.tree.itemClicked.connect(self.updateButtonState)
         
         # buttons
-        self.b_new              = IconButton('l', 'new.png', '&New', self.new)
-        self.b_rename           = IconButton('l', 'rename.png', '&Rename', self.rename)
-        self.b_edit             = IconButton('l', 'edit.png', '&Edit', self.edit)
-        self.b_merge            = IconButton('l', 'merge.png', '&Merge', self.merge)
-        self.b_delete           = IconButton('l', 'delete.png', '&Delete', self.delete)
-        self.b_remove_duplicate = IconButton('l', 'remove_duplicated.png', 'Remove Duplicated', self.removeDuplicated)
-        self.b_import_to_dict   = IconButton('l', 'import.png', '&Import to Dict', self.importToDict)
-        self.b_set_as_default   = IconButton('l', 'star.png', '&Set As Current', self.setAsDefault)
-        close                   = IconButton('l', 'exit.png', '&Close', self.close)
+        self.b_new              = IconButton('l', 'new.png', self.tr('&New'), self.new)
+        self.b_rename           = IconButton('l', 'rename.png', self.tr('&Rename'), self.rename)
+        self.b_edit             = IconButton('l', 'edit.png', self.tr('&Edit'), self.edit)
+        self.b_merge            = IconButton('l', 'merge.png', self.tr('&Merge'), self.merge)
+        self.b_delete           = IconButton('l', 'delete.png', self.tr('&Delete'), self.delete)
+        self.b_remove_duplicate = IconButton('l', 'remove_duplicated.png', self.tr('Remove Duplicated'), self.removeDuplicated)
+        self.b_import_to_dict   = IconButton('l', 'import.png', self.tr('&Import to Dict'), self.importToDict)
+        self.b_set_as_default   = IconButton('l', 'star.png', self.tr('&Set As Current'), self.setAsDefault)
+        close                   = IconButton('l', 'exit.png', self.tr('&Close'), self.close)
 
         
         button_layout = QtGui.QVBoxLayout()
