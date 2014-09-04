@@ -8,5 +8,5 @@ Exec=stardict-flashcard
 Terminal=false
 Icon=stardict-flashcard
 StartupNotify=true
-Categories=Utility;Office;Dictionary;
+Categories=Education;Languages;KDE;Qt;
 X-GNOME-DocPath=stardict/stardict.xml
