@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Stardict Flashcard
+GenericName=Stardict Flashcard
+Comment=A Flashcard for Stardict. Make Memorizing Vocabularies Easier.
+Exec=stardict-flashcard
+Terminal=false
+Icon=stardict-flashcard
+StartupNotify=true
+Categories=Utility;Office;Dictionary;
+X-GNOME-DocPath=stardict/stardict.xml
