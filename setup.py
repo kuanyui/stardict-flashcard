@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup
 
-import packages
+
 setup(
     name='stardict-flashcard',
-    version=puddlestuff.version_string,
+    version= '0.1',
     author='kuanyui',
     author_email='azazabc123@gmail.com',
     url='http://github.com/kuanyui/stardict-flashcard',
