@@ -1,8 +1,0 @@
-# -*- coding: utf-8 -*-
-import sys, os
-
-from PyQt4 import QtCore, QtGui
-
-class MainWindow(QtGui.QWidget):
-    def __init__(self, parent=None):
-        
