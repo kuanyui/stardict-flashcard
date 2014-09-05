@@ -1,60 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="zh_TW">
+<!DOCTYPE TS><TS version="2.0" language="zh_TW" sourcelanguage="">
 <context>
     <name>ArchiveFileManager</name>
     <message>
-        <location filename="stardict-flashcard.py" line="449"/>
+        <location filename="main.py" line="449"/>
         <source>Current</source>
         <translation>目前</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="449"/>
+        <location filename="main.py" line="449"/>
         <source>Filename</source>
         <translation>檔名</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="449"/>
+        <location filename="main.py" line="449"/>
         <source>Words</source>
         <translation>單字數</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="562"/>
+        <location filename="main.py" line="562"/>
         <source>Create a new archive</source>
         <translation>建立新的封存檔</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="562"/>
+        <location filename="main.py" line="562"/>
         <source>Please input a name for new archive file :</source>
         <translation>請為新的封存檔取個名子：</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="595"/>
+        <location filename="main.py" line="595"/>
         <source>Filename has already existed, please retry.</source>
         <translation>檔名已經存在，請重試。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="587"/>
+        <location filename="main.py" line="587"/>
         <source>Rename the archive file</source>
         <translation>重新命名</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="587"/>
+        <location filename="main.py" line="587"/>
         <source>Please input a new name for this archive file :</source>
         <translation>請為封存檔輸入新名子：</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="614"/>
+        <location filename="main.py" line="614"/>
         <source>Please press Ctrl and click to select multiple items first.</source>
         <translation>必須先按住Ctrl再點選清單，才可以選取多個檔案來合併。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="625"/>
+        <location filename="main.py" line="625"/>
         <source>Merge</source>
         <translation>合併</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="625"/>
+        <location filename="main.py" line="625"/>
         <source>You are about merging the following files:&lt;br&gt;
 &lt;ol&gt;{0}&lt;/ol&gt;
 Please input new file name for merged file:
@@ -66,106 +65,106 @@ Please input new file name for merged file:
 （不可使用已經存在的檔名）</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="640"/>
+        <location filename="main.py" line="640"/>
         <source>Filename has existed, please input another one.</source>
         <translation>檔案已經存在，請重新輸入。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="652"/>
+        <location filename="main.py" line="652"/>
         <source>File merged!</source>
         <translation>合併完成！</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="715"/>
+        <location filename="main.py" line="715"/>
         <source>Message</source>
         <translation>訊息</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="660"/>
+        <location filename="main.py" line="660"/>
         <source>This action will remove all duplicated words in &lt;b&gt;{0}&lt;/b&gt;.&lt;br&gt;
 This action cannot be undone, continue?</source>
         <translation>這個動作將會移除 &lt;b&gt;{0}&lt;/b&gt;中所有重複的字詞。&lt;br&gt;
 這個動作無法復原，繼續嗎?</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="685"/>
+        <location filename="main.py" line="685"/>
         <source>Remove Duplicated Words</source>
         <translation>移除重複字詞</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="687"/>
+        <location filename="main.py" line="687"/>
         <source>Done! {0} duplicated word removed.</source>
         <translation>完成！移除了 {0} 個重複的字詞。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="694"/>
+        <location filename="main.py" line="694"/>
         <source>You have to reserve at least one archive file.</source>
         <translation>你必須保留至少一個封存檔。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="700"/>
+        <location filename="main.py" line="700"/>
         <source>Are you sure to delete &lt;b&gt;{0}&lt;/b&gt;?&lt;br&gt;
                                                    (This action cannot be undone!)</source>
         <translation>你確定要刪除 &lt;b&gt;{0}&lt;/b&gt; 嗎?&lt;br&gt;
                                                    (這個動作無法復原！)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="715"/>
+        <location filename="main.py" line="715"/>
         <source>Are you sure to import &lt;b&gt;{0} ({1} words)&lt;/b&gt;?</source>
         <translation>你確定要匯入&lt;b&gt;{0} ({1} 個單字)&lt;/b&gt; 嗎？</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="723"/>
+        <location filename="main.py" line="723"/>
         <source>Done! {0} words imported.</source>
         <translation>完成！匯入了 {0} 個單字。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="464"/>
+        <location filename="main.py" line="464"/>
         <source>&amp;New</source>
         <translation>建立(&amp;N)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="465"/>
+        <location filename="main.py" line="465"/>
         <source>&amp;Rename</source>
         <translation>重新命名(&amp;R)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="466"/>
+        <location filename="main.py" line="466"/>
         <source>&amp;Edit</source>
         <translation>編輯(&amp;E)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="467"/>
+        <location filename="main.py" line="467"/>
         <source>&amp;Merge</source>
         <translation>合併(&amp;M)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="468"/>
+        <location filename="main.py" line="468"/>
         <source>&amp;Delete</source>
         <translation>刪除(&amp;D)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="469"/>
+        <location filename="main.py" line="469"/>
         <source>Remove Duplicated</source>
         <translation>移除重複字詞</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="471"/>
+        <location filename="main.py" line="471"/>
         <source>&amp;Set As Current</source>
         <translation>設為預設(&amp;S)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="472"/>
+        <location filename="main.py" line="472"/>
         <source>&amp;Close</source>
         <translation>關閉(&amp;C)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="470"/>
+        <location filename="main.py" line="470"/>
         <source>&amp;Import to Flashcard</source>
         <translation>匯入單字卡(&amp;I)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="700"/>
+        <location filename="main.py" line="700"/>
         <source>Delete File</source>
         <translation>刪除檔案</translation>
     </message>
@@ -173,22 +172,22 @@ This action cannot be undone, continue?</source>
 <context>
     <name>ArchiveList</name>
     <message>
-        <location filename="stardict-flashcard.py" line="384"/>
+        <location filename="main.py" line="384"/>
         <source>Input archive file</source>
         <translation>輸入封存檔名</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="392"/>
+        <location filename="main.py" line="392"/>
         <source>Message</source>
         <translation>訊息</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="392"/>
+        <location filename="main.py" line="392"/>
         <source>Are you sure to overwrite file &lt;b&gt;{0}&lt;/b&gt;?</source>
         <translation>你確定要覆寫 &lt;b&gt;{0}&lt;/b&gt; 嗎？</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="378"/>
+        <location filename="main.py" line="378"/>
         <source>Please input filename for archiving Flashcard,
 or select an existed one:</source>
         <translation>即將將單字卡封存；請輸入封存檔的檔名，
@@ -198,17 +197,17 @@ or select an existed one:</source>
 <context>
     <name>ConfigWindow</name>
     <message>
-        <location filename="stardict-flashcard.py" line="422"/>
+        <location filename="main.py" line="422"/>
         <source>Memorized count:</source>
         <translation>背誦次數：</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="419"/>
+        <location filename="main.py" line="419"/>
         <source>Flashcard file path:</source>
         <translation>單字卡目錄：</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="431"/>
+        <location filename="main.py" line="431"/>
         <source>Select Flashcard File Path</source>
         <translation>選擇單字卡的檔案路徑</translation>
     </message>
@@ -216,17 +215,17 @@ or select an existed one:</source>
 <context>
     <name>HelpWindow</name>
     <message>
-        <location filename="stardict-flashcard.py" line="762"/>
+        <location filename="main.py" line="762"/>
         <source>Thanks for using Stardict Flashcard!</source>
         <translation>感謝使用Stardict Flashcard！</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="756"/>
+        <location filename="main.py" line="756"/>
         <source>&amp;Ok</source>
         <translation>&amp;好</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="734"/>
+        <location filename="main.py" line="734"/>
         <source>
 &lt;h1&gt;Welcome to &lt;i&gt;Stardict Flashcard&lt;/i&gt;!&lt;/h1&gt;
 You can add new word into Flashcard file within Stardict with &lt;span style=&apos;background-color: #afd7ff; color: #005f87; white-space:pre;&apos;&gt; Alt+e &lt;/span&gt;.&lt;br&gt;
@@ -272,57 +271,57 @@ Stardict Flashcard 是一個自由軟體，歡迎來貢獻一己之力！瀏覽 
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="stardict-flashcard.py" line="309"/>
+        <location filename="main.py" line="309"/>
         <source>&amp;Configuration</source>
         <translation>設定(&amp;C)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="309"/>
+        <location filename="main.py" line="309"/>
         <source>Open configuration window.</source>
         <translation>打開設定視窗。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="316"/>
+        <location filename="main.py" line="316"/>
         <source>&amp;Manage</source>
         <translation>管理(&amp;M)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="316"/>
+        <location filename="main.py" line="316"/>
         <source>Create, import, rename, edit, delete archive file.</source>
         <translation>建立、匯入、重新命名、編輯、刪除封存檔。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="357"/>
+        <location filename="main.py" line="357"/>
         <source>&amp;Help</source>
         <translation>說明(&amp;H)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="323"/>
+        <location filename="main.py" line="323"/>
         <source>Open help window.</source>
         <translation>打開說明視窗。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="342"/>
+        <location filename="main.py" line="342"/>
         <source>&amp;Open Archive Directory</source>
         <translation>開啟封存目錄(&amp;O)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="342"/>
+        <location filename="main.py" line="342"/>
         <source>Open archive directory with external file manager.</source>
         <translation>使用外部檔案管理員打開封存用目錄。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="350"/>
+        <location filename="main.py" line="350"/>
         <source>&amp;File</source>
         <translation>檔案(&amp;F)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="353"/>
+        <location filename="main.py" line="353"/>
         <source>&amp;Archive</source>
         <translation>封存(&amp;A)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="235"/>
+        <location filename="main.py" line="235"/>
         <source>No word remains in Flashcard file now.
 Now you can add new word via StarDict (Alt + e).
 You also can import an archived file to start another reviewing.</source>
@@ -331,22 +330,22 @@ You also can import an archived file to start another reviewing.</source>
 或者匯入封存檔來複習舊字詞。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="330"/>
+        <location filename="main.py" line="330"/>
         <source>&amp;Archive Whole Flashcard</source>
         <translation>封存整個單字卡(&amp;A)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="330"/>
+        <location filename="main.py" line="330"/>
         <source>Archive all words in Flashcard, then you can import the other archive file.</source>
         <translation>將單字卡中的所有字詞封存，如此一來就可以再匯入另一個封存檔。</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="336"/>
+        <location filename="main.py" line="336"/>
         <source>&amp;Open Flashcard File</source>
         <translation>開啟單字卡(&amp;O)</translation>
     </message>
     <message>
-        <location filename="stardict-flashcard.py" line="336"/>
+        <location filename="main.py" line="336"/>
         <source>Open Flashcard file with system default editor.</source>
         <translation>使用系統預設的編輯器開啟單字卡。</translation>
     </message>
