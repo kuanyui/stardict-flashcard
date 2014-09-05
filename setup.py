@@ -10,7 +10,7 @@ setup(
     url='http://github.com/kuanyui/stardict-flashcard',
     download_url='http://github.com/kuanyui/stardict-flashcard',
     description='A Flashcard For StarDict. (Based on sdcv)',
-    packages = ['packages'],
+    packages = ['main'],
 
     keywords=['stardict', 'dictionary', 'flashcard', 'learning', 'language'],
     license='GNU General Public License v3',
@@ -26,7 +26,7 @@ setup(
         'Topic :: Education',
              ],
         
-    scripts = ['stardict-flashcard'],
+    scripts = ['run'],
     data_files=[('share/pixmaps/stardict-flashcard', ('16.png',
                                                       '22.png',
                                                       '32.png',
