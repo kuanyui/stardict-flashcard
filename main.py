@@ -181,6 +181,7 @@ class MainWindow(QtGui.QMainWindow):
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
+        QtGui.QShortcut(QtGui.QKeySequence('Delete'), self, self.removeCurrentWord)
         
         # Initilize word list
         self.io = FileIO()
@@ -251,6 +252,17 @@ You also can import an archived file to start another reviewing.'''))
     def archiveCurrentWord(self):
         self.io.archiveWord(self.index)
         self.correctIndex()
+
+    def removeCurrentWord(self):
+        reply = QtGui.QMessageBox.question(
+            self, self.tr('Message'),
+            self.tr("Are you exactly sure to remove this word?"),
+            QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            self.io.removeWord(self.index)
+            self.correctIndex()
+            self.statusBar().showMessage("Word removed.")
+            QtCore.QTimer.singleShot(1000, lambda: self.statusBar().clearMessage())
         
     def incfIndex(self):
         '''next word, but without +1 count num'''
@@ -743,7 +755,8 @@ After adding some word into Flashcard file, it's time to startup <i>Stardict Fla
 <li>Press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Space </span> to display answer.</li>
 <li>Then press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Enter </span> means you can recite this word.</li>
 <li>Or if you can't think of the word and recite it, press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Space </span> to go on instead.</li>
-<li>After a word can be recited up to 5 times, the word will be archived into current archive file automatically.<li>
+<li>After a word can be recited up to 5 times, the word will be archived into current archive file automatically.</li>
+<li>If a word was added by accident, you can press <span style='background-color: #afd7ff; color: #005f87; white-space:pre;'> Delete </span> to remove it.</li>
 </ol>
 
 After finishing all words, you still can review them again by <b>importing archive file</b> back to Flashcard file.<br>
