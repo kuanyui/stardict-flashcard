@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 ROOT = os.path.expanduser('~/.stardict-flashcard/')
 CONFIG_PATH = os.path.join(ROOT, 'rc.ini')
 ARCHIVE_DIR = os.path.join(ROOT, 'archive')
+ACT_ICON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons/actions/')
 
 OPEN_FIRST_TIME_HELP = False
 
@@ -126,7 +127,7 @@ class FileIO():
 class IconButton(QtGui.QPushButton):
     def __init__(self, align, iconFilename, text, function):
         super().__init__()
-        self.setIcon(QtGui.QIcon("icons/actions/" + iconFilename))
+        self.setIcon(QtGui.QIcon(ACT_ICON_DIR + iconFilename))
         self.setText(text)
         if align == 'l':
             self.setStyleSheet("text-align:left")
@@ -307,40 +308,40 @@ You also can import an archived file to start another reviewing.'''))
 
     def _createActions(self):
         self.configAct = QtGui.QAction(
-            QtGui.QIcon("icons/actions/config.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "config.png"),
             self.tr("&Configuration"), self,
             shortcut = QtGui.QKeySequence("Ctrl+P"),
             statusTip = self.tr("Open configuration window."),
             triggered = self.openConfigWindow
         )
         self.openArchiveFileManagerAct = QtGui.QAction(
-            QtGui.QIcon("icons/actions/star.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "star.png"),
             self.tr("&Manage"), self,
             shortcut = QtGui.QKeySequence("Ctrl+M"),
             statusTip = self.tr("Create, import, rename, edit, delete archive file."),
             triggered = self.openArchiveFileManager
         )
         self.openHelpWindowAct = QtGui.QAction(
-            QtGui.QIcon("icons/actions/help.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "help.png"),
             self.tr("&Help"), self,
             shortcut = QtGui.QKeySequence.HelpContents,
             statusTip = self.tr("Open help window."),
             triggered = self.openHelpWindow
         )
         self.archiveFlashcardAct = QtGui.QAction(
-            QtGui.QIcon("icons/actions/archive.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "archive.png"),
             self.tr("&Archive Whole Flashcard"), self,
             statusTip = self.tr("Archive all words in Flashcard, then you can import the other archive file."),
             triggered = self.archiveFlashcard
         )
         self.openFlashcardFileAct = QtGui.QAction(
-            QtGui.QIcon("icons/actions/edit.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "edit.png"),
             self.tr("&Open Flashcard File"), self,
             statusTip = self.tr("Open Flashcard file with system default editor."),
             triggered = self.openFlashcardFile
         )
         self.openArchiveDirectoryAct = QtGui.QAction(
-            QtGui.QIcon("icons/actions/browse.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "browse.png"),
             self.tr("&Open Archive Directory"), self,
             statusTip = self.tr("Open archive directory with external file manager."),
             triggered = self.openArchiveDirectory
