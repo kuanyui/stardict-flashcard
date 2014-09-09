@@ -202,7 +202,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.word = self.io.wordList[self.index][0]
             self.word_label.setText(self.word)
-            cmd = subprocess.Popen(['sdcv', self.word], stdout=subprocess.PIPE)
+            cmd = subprocess.Popen(['sdcv', '-n', self.word], stdout=subprocess.PIPE)
             output = cmd.stdout.read()
             output = output.decode('utf-8')
             formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
