@@ -61,6 +61,8 @@ Press ``Space`` to display the answer of current word:
 
 After a word can be recited up to 5 times (default), the word will be archived into current archive file automatically.
 
+    Sometimes you may have added some wrong word, you can delete it from flashcard with ``Delete`` key.
+
 Manage Archives
 ---------------
 
