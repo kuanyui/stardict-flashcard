@@ -1,16 +1,23 @@
 Stardict Flashcard
 =================
 
-Flashcard is a kind of great tool for learning foreign language. There has been some excellent cross-platform flashcard programs like `Anki<http://ankisrs.net/>`_. However, all of them needs user to spend a lot of time to make flashcards. That's too awfully inconvenient.
+.. image:: https://farm6.staticflickr.com/5586/15069695100_d934b4f6e9_c.jpg
 
-*Stardict Flashcard* is here. Now you just need to have a word list, *Stardict Flashcard* will grab the explanations automatically via `sdcv<http://sdcv.sourceforge.net/>`_:
+Flashcard is a kind of great tool for learning foreign language. There has been some excellent cross-platform flashcard programs like `Anki
+<http://ankisrs.net/>`_. However, all of them needs user to spend a lot of time to make flashcards. That's too awfully inconvenient.
+
+*Stardict Flashcard* is here. Now you just need to have a word list, *Stardict Flashcard* will grab the explanations automatically via `sdcv
+<http://sdcv.sourceforge.net/>`_:
 
 .. image:: manual/diagram.png
+	   
+Never waste time for making flashcard files anymore ˊ・ω・ˋ 
 
 Requirements
 ============
 
-- `sdcv<http://sdcv.sourceforge.net/>`_
+- `sdcv
+  <http://sdcv.sourceforge.net/>`_
 - Python3
 - PyQt4
 - make *(optional)*
@@ -67,7 +74,8 @@ Contribution
 Translation
 -----------
 
-You can translate this program on `Transifex<https://www.transifex.com/projects/p/stardict-flashcard/>`_.
+You can translate this program on `Transifex
+<https://www.transifex.com/projects/p/stardict-flashcard/>`_.
 
 Or manully, clone the repo and use Qt Linguist or text editor to edit translation file:
 
