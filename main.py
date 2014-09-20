@@ -195,6 +195,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
         QtGui.QShortcut(QtGui.QKeySequence('Delete'), self, self.removeCurrentWord)
+        QtGui.QShortcut(QtGui.QKeySequence('Backspace'), self, self.back)
         
         # Initilize word list
         self.io = FileIO()
@@ -266,6 +267,9 @@ You also can import an archived file to start another reviewing.'''))
         else:
             if self.index >= self.io.length():
                 self.index = 0
+            elif self.index < 0:
+                self.index = self.io.length() - 1
+                
             self.refresh()
 
     # [FIXME] index and the whole function should be totally in IO
@@ -308,6 +312,10 @@ You also can import an archived file to start another reviewing.'''))
             self.showDescription()
         elif self.now == 'answered':
             self.incfIndex()
+
+    def back(self):
+        self.index -= 1
+        self.correctIndex()
 
     def closeEvent(self, event):
         global REMEMBER_INDEX
