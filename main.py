@@ -57,53 +57,61 @@ class FileIO():
         self.linePattern=re.compile(r'([^\t]+)\t([0-9]+)\n')
 
     def initializeFile(self):
-        '''Read Flashcard file and add count numbers, and read into self.lineList,
-        then parsed into self.wordList.'''
+        '''Read Flashcard file and add count numbers,
+        then create/update lineList'''
         with open(FLASHCARD_PATH, 'r') as file:
             lineList = file.readlines()
         # Check each line in dict file if count num exist. if not, add it.
         for index, line in enumerate(lineList):
             if not self.linePattern.match(line):
                 lineList[index] = re.search('([^\t]+)\n', line).group(1) + '\t' + '0' + '\n'
-
         self.lineList = lineList     # lineList = ['噂\t2\n','納得\t0\n']
-        self._writeLineListIntoFile()
-        self.readFileIntoWordList()
+        self.writeLineListIntoFile()
 
-    def _writeLineListIntoFile(self):
+    def writeLineListIntoFile(self):
         with open(FLASHCARD_PATH, 'w') as file:
             file.writelines(self.lineList)
 
-    def readFileIntoWordList(self):
-        # read lines into a list [('噂', 2), ('納得', 0), ...]
-        linePattern = self.linePattern
-        self.wordList = []
-        for x in self.lineList:
-            match = linePattern.search(x)
-            self.wordList.append((match.group(1), int(match.group(2))))
+    def checkIfFileUpdated(self):
+        newAmount = sum(1 for line in open(FLASHCARD_PATH))
+        if newAmount > len(self.lineList):
+            self.initializeFile()
 
-    def formatWordListAndWriteIntoFile(self):
-        self.lineList = []
-        for word, count in self.wordList:
-            self.lineList.append('{0}\t{1}\n'.format(word, count))
-        self._writeLineListIntoFile()
+    def increaseItemCount(self, index):
+        self.checkIfFileUpdated()
+        word, count = self.getItem(index)
+        count += 1
+        self.lineList[index] = "{0}\t{1}\n".format(word, count)
+        self.writeLineListIntoFile()
+        return count
+
+    def getItem(self, index):
+        item = self.linePattern.search(self.lineList[index])
+        word = item.group(1)
+        count = int(item.group(2))
+        return word, count
+
+    def length(self):
+        return len(self.lineList)
 
     def archiveWord(self, index):
+        self.checkIfFileUpdated()
         with open(ARCHIVE_FILE_FULLNAME, 'a') as file:
-            file.write(self.wordList[index][0] + '\n')
+            file.write(self.lineList[index].partition('\t')[0] + '\n')
         # Delete word from list (but not write list into dict file yet)
-        del self.wordList[index]
-        self.formatWordListAndWriteIntoFile()
+        del self.lineList[index]
+        self.writeLineListIntoFile()
 
     def removeWord(self, index):
-        del self.wordList[index]
-        self.formatWordListAndWriteIntoFile()
+        self.checkIfFileUpdated()
+        del self.lineList[index]
+        self.writeLineListIntoFile()
 
     def importArchivedFile(self, archiveFilename):
         with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'r') as archiveFile:
             archive_content = archiveFile.read() # [FIXME] May I must to use self in here?
-        with open(FLASHCARD_PATH, 'a') as dictFile:
-            dictFile.write(archive_content)
+        with open(FLASHCARD_PATH, 'a') as flashcardFile:
+            flashcardFileFile.write(archive_content)
         self.initializeFile()
 
     def archiveWholeFlashcard(self, archiveFilename):
@@ -112,8 +120,7 @@ class FileIO():
         with open(os.path.join(ARCHIVE_DIR, archiveFilename), 'w') as file:
             file.write(wholeFlashcardContent)
         # Clear Flashcard file.
-        self.wordList = []
-        self.formatWordListAndWriteIntoFile()
+        self.initializeFile()
         
     def editWithSystemEditor(self, filePath):
         editor = os.getenv('EDITOR')
@@ -194,15 +201,17 @@ class MainWindow(QtGui.QMainWindow):
             self.openHelpWindow()
 
     def refresh(self):
-        if len(self.io.wordList) == 0:
+        self.io.checkIfFileUpdated()
+        word, count = self.io.getItem(self.index)
+        if self.io.length() == 0:
             self.allWordsFinished()
             return None         # jump out of function
         else:
             self.archiveFlashcardAct.setEnabled(True)
-        if self.io.wordList[self.index][1] >= MEMORIZED_COUNT:
+        if count >= MEMORIZED_COUNT:
             self.archiveCurrentWord()
         else:
-            self.word = self.io.wordList[self.index][0]
+            self.word = word
             self.word_label.setText(self.word)
             cmd = subprocess.Popen(['sdcv', '-n', self.word], stdout=subprocess.PIPE)
             output = cmd.stdout.read()
@@ -221,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
         self.refreshStatusBar()
 
     def refreshStatusBar(self):
-        wordsTotal = len(self.io.wordList)
+        wordsTotal = self.io.length()
         index = self.index + 1
         if wordsTotal > 1:
             self.status_index.setText("{0}/{1}".format(index, wordsTotal))
@@ -242,13 +251,14 @@ You also can import an archived file to start another reviewing.'''))
         '''If no word remains in wordList, call allWordsFinished().
         If index is out of list, set it to 0.
         Finally, refresh()'''
-        if len(self.io.wordList) == 0:
+        if self.io.length() == 0:
             self.allWordsFinished()
         else:
-            if self.index >= len(self.io.wordList):
+            if self.index >= self.io.length():
                 self.index = 0
             self.refresh()
 
+    # [FIXME] index and the whole function should be totally in IO
     def archiveCurrentWord(self):
         self.io.archiveWord(self.index)
         self.correctIndex()
@@ -259,6 +269,7 @@ You also can import an archived file to start another reviewing.'''))
             self.tr("Are you exactly sure to remove this word?"),
             QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
+            self.io.checkIfFileUpdated()
             self.io.removeWord(self.index)
             self.correctIndex()
             self.statusBar().showMessage("Word removed.")
@@ -273,13 +284,11 @@ You also can import an archived file to start another reviewing.'''))
         if self.now == 'unanswered':
             None
         else:
-            self.io.wordList[self.index] = (self.io.wordList[self.index][0],
-                                         self.io.wordList[self.index][1] + 1)
-            if self.io.wordList[self.index][1] >= MEMORIZED_COUNT:
+            count = self.io.increaseItemCount(self.index)
+            if count >= MEMORIZED_COUNT:
                 self.archiveCurrentWord()
             else:
                 self.incfIndex()
-            self.io.formatWordListAndWriteIntoFile()
             self.statusBar().showMessage("Bingo!")
             QtCore.QTimer.singleShot(1000, lambda: self.statusBar().clearMessage())
 
@@ -291,7 +300,8 @@ You also can import an archived file to start another reviewing.'''))
             self.incfIndex()
 
     def closeEvent(self, event):
-        self.io.formatWordListAndWriteIntoFile()
+        self.io.checkIfFileUpdated()
+        self.io.writeLineListIntoFile()
 
     def archiveFlashcard(self):
         '''Archive all words in Flashcard.'''
