@@ -194,7 +194,6 @@ class MainWindow(QtGui.QMainWindow):
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
-        QtGui.QShortcut(QtGui.QKeySequence('Delete'), self, self.removeCurrentWord)
         QtGui.QShortcut(QtGui.QKeySequence('Backspace'), self, self.back)
         
         # Initilize word list
@@ -350,6 +349,9 @@ You also can import an archived file to start another reviewing.'''))
         self.io.initializeFile()
         self.refresh()
 
+    def openJumpToNumberWindow(self):
+        self.jump_to_number_window = JumpToNumberWindow(self)
+
     def _createActions(self):
         self.configAct = QtGui.QAction(
             QtGui.QIcon(ACT_ICON_DIR + "config.png"),
@@ -390,18 +392,70 @@ You also can import an archived file to start another reviewing.'''))
             statusTip = self.tr("Open archive directory with external file manager."),
             triggered = self.openArchiveDirectory
         )
+        self.openJumpToNumberWindowAct = QtGui.QAction(
+            QtGui.QIcon(ACT_ICON_DIR + "import.png"),
+            self.tr("&Jump To Number"), self,
+            shortcut = QtGui.QKeySequence("J"),
+            statusTip = self.tr("Jump to number directly."),
+            triggered = self.openJumpToNumberWindow
+        )
+        self.removeCurrentWordAct = QtGui.QAction(
+            QtGui.QIcon(ACT_ICON_DIR + "remove.png"),
+            self.tr("&Remove Current Word"), self,
+            shortcut = QtGui.QKeySequence("Delete"),
+            statusTip = self.tr("Remove current word directly."),
+            triggered = self.removeCurrentWord
+        )
 
     def _createMenus(self):
         self.menu_bar = self.menuBar().addMenu(self.tr("&File"))
         self.menu_bar.addAction(self.openFlashcardFileAct)
         self.menu_bar.addAction(self.configAct)
+        self.menu_bar = self.menuBar().addMenu(self.tr("&Word"))
+        self.menu_bar.addAction(self.openJumpToNumberWindowAct)
+        self.menu_bar.addAction(self.removeCurrentWordAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Archive"))
         self.menu_bar.addAction(self.openArchiveFileManagerAct)
         self.menu_bar.addAction(self.archiveFlashcardAct)
         self.menu_bar.addAction(self.openArchiveDirectoryAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Help"))
         self.menu_bar.addAction(self.openHelpWindowAct)
+
+class JumpToNumberWindow(QtGui.QDialog):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle(self.tr("Jump to..."))
+
+        maxRange = parent.io.length()
+        self.spin_box = QtGui.QSpinBox()
+        self.spin_box.setRange(1, maxRange)
         
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.slider.setRange(1, maxRange)
+
+        self.spin_box.valueChanged.connect(self.slider.setValue)
+        self.slider.valueChanged.connect(self.spin_box.setValue)
+        
+        button_box = QtGui.QDialogButtonBox(
+        QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.apply)
+        button_box.rejected.connect(self.close)
+
+        # Layout
+        layout = QtGui.QGridLayout()
+        layout.addWidget(QtGui.QLabel(self.tr("Input Number:")), 0, 0)
+        layout.addWidget(self.spin_box, 0, 1)
+        layout.addWidget(self.slider, 1, 0, 1, 2)
+        layout.addWidget(button_box, 2, 0, 1, 2)
+
+        self.setLayout(layout)
+        self.show()
+    
+    def apply(self):
+        self.parent.index = self.spin_box.value()
+        self.parent.refresh()
+        self.close()
 
 class ArchiveList(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -415,7 +469,7 @@ class ArchiveList(QtGui.QDialog):
         list_widget.itemClicked.connect(self.setLineEditText)
 
         button_box = QtGui.QDialogButtonBox(
-            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+        QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.apply)
         button_box.rejected.connect(self.close)
         
