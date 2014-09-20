@@ -200,7 +200,7 @@ class MainWindow(QtGui.QMainWindow):
         self.io = FileIO()
         self.io.initializeFile()
 
-        if REMEMBER_INDEX is not False:
+        if REMEMBER_INDEX >= 0:
             self.index = REMEMBER_INDEX
         else:
             self.index = 0
@@ -313,7 +313,8 @@ You also can import an archived file to start another reviewing.'''))
         global REMEMBER_INDEX
         self.io.checkIfFileUpdated()
         self.io.writeLineListIntoFile()
-        REMEMBER_INDEX = int(self.index)
+        if REMEMBER_INDEX >= 0:
+            REMEMBER_INDEX = int(self.index)
         self.config.writeConfigFile()
 
     def archiveFlashcard(self):
@@ -452,7 +453,7 @@ class ConfigWindow(QtGui.QDialog):
         button_box.rejected.connect(self.close)
 
         self.remember_index_checkbox = QtGui.QCheckBox("&Remember Index After Quit")
-        if REMEMBER_INDEX is not False:
+        if REMEMBER_INDEX >= 0:
             self.remember_index_checkbox.setChecked(True)
         
         layout = QtGui.QGridLayout()
@@ -479,10 +480,10 @@ class ConfigWindow(QtGui.QDialog):
         global FLASHCARD_PATH, MEMORIZED_COUNT, REMEMBER_INDEX
         FLASHCARD_PATH  = str(self.line_dict_path.text())
         MEMORIZED_COUNT = int(self.spin_box.value())
-        if self.remember_index_checkbox.checkState() == QtCore.Qt.Unchecked:
-            REMEMBER_INDEX = False
-        else:
+        if self.remember_index_checkbox.checkState() == QtCore.Qt.Checked:
             REMEMBER_INDEX = 0
+        else:
+            REMEMBER_INDEX = -1
 
         self.parent.config.writeConfigFile()
         self.close()
