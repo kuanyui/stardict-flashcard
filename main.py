@@ -23,6 +23,7 @@ ArchiveFileName = default-archive
 
 [Main]
 MemorizedCount = 5
+RememberIndex = 0
 
 [Other]
 FirstTimeHelp = True
@@ -31,24 +32,30 @@ FirstTimeHelp = True
         self.parser = configparser.ConfigParser()
         self.parser.optionxform = str # Preserve cases of keys.
         self.parser.read(CONFIG_PATH)
-        
+        try:
+            self.initializeGlobalVar()
+        except KeyError: # if the format of config file has been changed.
+            os.remove(CONFIG_PATH)
+            self.__init__()
+            
     def initializeGlobalVar(self):
-        global FLASHCARD_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT
-        FLASHCARD_PATH             = os.path.expanduser(self.parser['Path']['FlashcardPath'])
+        global FLASHCARD_PATH, ARCHIVE_FILE_NAME, ARCHIVE_FILE_FULLNAME, MEMORIZED_COUNT, REMEMBER_INDEX
+        FLASHCARD_PATH        = os.path.expanduser(self.parser['Path']['FlashcardPath'])
         ARCHIVE_FILE_NAME     = self.parser['Path']['ArchiveFileName']
         ARCHIVE_FILE_FULLNAME = os.path.join(ARCHIVE_DIR, ARCHIVE_FILE_NAME)
         MEMORIZED_COUNT       = int(self.parser['Main']['MemorizedCount'])
+        REMEMBER_INDEX        = int(self.parser['Main']['RememberIndex'])
         # if Archive dir & file not exist, create
         if not os.path.isdir(ARCHIVE_DIR):
             os.makedirs(ARCHIVE_DIR)
         if not os.path.exists(ARCHIVE_FILE_FULLNAME):
             open(ARCHIVE_FILE_FULLNAME, 'a').close() # touch current archive file
 
-
     def writeConfigFile(self):
-        self.parser['Path']['FlashcardPath']           = FLASHCARD_PATH
-        self.parser['Path']['ArchiveFileName']    = ARCHIVE_FILE_NAME
-        self.parser['Main']['MemorizedCount']     = str(MEMORIZED_COUNT)
+        self.parser['Path']['FlashcardPath']   = FLASHCARD_PATH
+        self.parser['Path']['ArchiveFileName'] = ARCHIVE_FILE_NAME
+        self.parser['Main']['MemorizedCount']  = str(MEMORIZED_COUNT)
+        self.parser['Main']['RememberIndex']   = str(REMEMBER_INDEX)
         with open(CONFIG_PATH, 'w') as file:
             self.parser.write(file)
 
@@ -145,8 +152,7 @@ class IconButton(QtGui.QPushButton):
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
-        self.config = ConfigFile()
-        self.config.initializeGlobalVar()
+        self.config = ConfigFile(self)
         self._createActions()
         self._createMenus()
         self.setWindowTitle("Stardict Flashcard")
@@ -194,7 +200,11 @@ class MainWindow(QtGui.QMainWindow):
         self.io = FileIO()
         self.io.initializeFile()
 
-        self.index = 0
+        if REMEMBER_INDEX is not False:
+            self.index = REMEMBER_INDEX
+        else:
+            self.index = 0
+            
         self.refresh()
         self.show()
         if OPEN_FIRST_TIME_HELP == True:
@@ -300,8 +310,11 @@ You also can import an archived file to start another reviewing.'''))
             self.incfIndex()
 
     def closeEvent(self, event):
+        global REMEMBER_INDEX
         self.io.checkIfFileUpdated()
         self.io.writeLineListIntoFile()
+        REMEMBER_INDEX = int(self.index)
+        self.config.writeConfigFile()
 
     def archiveFlashcard(self):
         '''Archive all words in Flashcard.'''
@@ -437,6 +450,10 @@ class ConfigWindow(QtGui.QDialog):
         button_box = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.applyAndWriteConfigFile)
         button_box.rejected.connect(self.close)
+
+        self.remember_index_checkbox = QtGui.QCheckBox("&Remember Index After Quit")
+        if REMEMBER_INDEX is not False:
+            self.remember_index_checkbox.setChecked(True)
         
         layout = QtGui.QGridLayout()
         layout.addWidget(QtGui.QLabel(self.tr("Flashcard file path:")), 0, 0)
@@ -444,7 +461,9 @@ class ConfigWindow(QtGui.QDialog):
         layout.addWidget(button_dict_path, 0, 2)
         layout.addWidget(QtGui.QLabel(self.tr("Memorized count:")), 1, 0)
         layout.addWidget(self.spin_box, 1, 1, 1, 1)
-        layout.addWidget(button_box, 2, 1, 1, 2)
+        layout.addWidget(self.remember_index_checkbox, 2, 0)
+        layout.addWidget(button_box, 3, 1, 1, 2)
+
 
         self.setLayout(layout)
         self.adjustSize()
@@ -457,9 +476,13 @@ class ConfigWindow(QtGui.QDialog):
             self.line_dict_path.setText(path)
 
     def applyAndWriteConfigFile(self):
-        global FLASHCARD_PATH, MEMORIZED_COUNT
-        FLASHCARD_PATH             = str(self.line_dict_path.text())
-        MEMORIZED_COUNT       = int(self.spin_box.value())
+        global FLASHCARD_PATH, MEMORIZED_COUNT, REMEMBER_INDEX
+        FLASHCARD_PATH  = str(self.line_dict_path.text())
+        MEMORIZED_COUNT = int(self.spin_box.value())
+        if self.remember_index_checkbox.checkState() == QtCore.Qt.Unchecked:
+            REMEMBER_INDEX = False
+        else:
+            REMEMBER_INDEX = 0
 
         self.parent.config.writeConfigFile()
         self.close()
