@@ -84,6 +84,12 @@ class FileIO():
         if newAmount > len(self.lineList):
             self.initializeFile()
 
+    def setItemCountToZero(self, index):
+        self.checkIfFileUpdated()
+        word, count = self.getItem(index)
+        self.lineList[index] = "{0}\t{1}\n".format(word, 0)
+        self.writeLineListIntoFile()
+        
     def increaseItemCount(self, index):
         self.checkIfFileUpdated()
         word, count = self.getItem(index)
@@ -316,6 +322,11 @@ You also can import an archived file to start another reviewing.'''))
         self.index -= 1
         self.correctIndex()
 
+    def setCurrentItemCountToZero(self):
+        self.io.setItemCountToZero(self.index)
+        self.statusBar().showMessage("Done; the count of this word has been reset to 0.")
+        QtCore.QTimer.singleShot(3000, lambda: self.statusBar().clearMessage())
+
     def closeEvent(self, event):
         global REMEMBER_INDEX
         self.io.checkIfFileUpdated()
@@ -406,6 +417,14 @@ You also can import an archived file to start another reviewing.'''))
             statusTip = self.tr("Remove current word directly."),
             triggered = self.removeCurrentWord
         )
+        self.setCurrentItemCountToZeroAct = QtGui.QAction(
+            QtGui.QIcon(ACT_ICON_DIR + "reset.png"),
+            self.tr("&Reset Count of This Word"), self,
+            shortcut = QtGui.QKeySequence("0"),
+            statusTip = self.tr("Reset count of this word to zero."),
+            triggered = self.setCurrentItemCountToZero
+        )
+        
 
     def _createMenus(self):
         self.menu_bar = self.menuBar().addMenu(self.tr("&File"))
@@ -413,6 +432,7 @@ You also can import an archived file to start another reviewing.'''))
         self.menu_bar.addAction(self.configAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Word"))
         self.menu_bar.addAction(self.openJumpToNumberWindowAct)
+        self.menu_bar.addAction(self.setCurrentItemCountToZeroAct)
         self.menu_bar.addAction(self.removeCurrentWordAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Archive"))
         self.menu_bar.addAction(self.openArchiveFileManagerAct)
@@ -453,7 +473,7 @@ class JumpToNumberWindow(QtGui.QDialog):
         self.show()
     
     def apply(self):
-        self.parent.index = self.spin_box.value()
+        self.parent.index = self.spin_box.value() - 1
         self.parent.refresh()
         self.close()
 
