@@ -251,7 +251,6 @@ class MainWindow(QtGui.QMainWindow):
         # Key Binding
         QtGui.QShortcut(QtGui.QKeySequence('Space'), self, self.goOn)
         QtGui.QShortcut(QtGui.QKeySequence('Return'), self, self.bingo)
-        QtGui.QShortcut(QtGui.QKeySequence('Backspace'), self, self.back)
         
         # Initilize word list
         self.io = FileIO()
@@ -457,7 +456,7 @@ You also can import an archived file to start another reviewing.'''))
             triggered = self.openArchiveDirectory
         )
         self.openJumpToNumberWindowAct = QtGui.QAction(
-            QtGui.QIcon(ACT_ICON_DIR + "import.png"),
+            QtGui.QIcon(ACT_ICON_DIR + "jump.png"),
             self.tr("&Jump To Number"), self,
             shortcut = QtGui.QKeySequence("J"),
             statusTip = self.tr("Jump to number directly."),
@@ -472,10 +471,17 @@ You also can import an archived file to start another reviewing.'''))
         )
         self.setCurrentItemCountToZeroAct = QtGui.QAction(
             QtGui.QIcon(ACT_ICON_DIR + "reset.png"),
-            self.tr("&Reset Count of This Word"), self,
+            self.tr("Reset &Count of This Word"), self,
             shortcut = QtGui.QKeySequence("0"),
             statusTip = self.tr("Reset count of this word to zero."),
             triggered = self.setCurrentItemCountToZero
+        )
+        self.backAct = QtGui.QAction(
+            QtGui.QIcon(ACT_ICON_DIR + "back.png"),
+            self.tr("&Previous Word"), self,
+            shortcut = QtGui.QKeySequence("Backspace"),
+            statusTip = self.tr("Go back to previous word."),
+            triggered = self.back
         )
         
 
@@ -484,7 +490,9 @@ You also can import an archived file to start another reviewing.'''))
         self.menu_bar.addAction(self.openFlashcardFileAct)
         self.menu_bar.addAction(self.configAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Word"))
+        self.menu_bar.addAction(self.backAct)
         self.menu_bar.addAction(self.openJumpToNumberWindowAct)
+        self.menu_bar.addSeparator()
         self.menu_bar.addAction(self.setCurrentItemCountToZeroAct)
         self.menu_bar.addAction(self.removeCurrentWordAct)
         self.menu_bar = self.menuBar().addMenu(self.tr("&Archive"))
