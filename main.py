@@ -16,8 +16,8 @@ def sdcv(word):
     formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
     formattedOut = re.sub(r'-->(.+)<br>\n-->(.+)<br>',
                           r'''
-<h5 style='background-color:#184880; color:#88bbff; margin:0;'>\1</h5>
-<h3 style='background-color:#184880; color:#fff; margin:0;'>\2</h3>
+<h5 style='background-color:#666; color:#88bbff; margin:0;'>\1</h5>
+<h3 style='background-color:#666; color:#fff; margin:0;'>\2</h3>
                                   '''
                           , formattedOut)
             # print(formattedOut)
