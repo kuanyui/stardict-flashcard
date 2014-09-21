@@ -9,6 +9,55 @@ ACT_ICON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons/
 
 OPEN_FIRST_TIME_HELP = False
 
+def sdcv(word):
+    cmd = subprocess.Popen(['sdcv', '-n', word], stdout=subprocess.PIPE)
+    output = cmd.stdout.read()
+    output = output.decode('utf-8')
+    formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
+    formattedOut = re.sub(r'-->(.+)<br>\n-->(.+)<br>',
+                          r'''
+<h5 style='background-color:#184880; color:#88bbff; margin:0;'>\1</h5>
+<h3 style='background-color:#184880; color:#fff; margin:0;'>\2</h3>
+                                  '''
+                          , formattedOut)
+            # print(formattedOut)
+    return formattedOut
+
+class LookupTooltip(QtGui.QWidget):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setWindowFlags(QtCore.Qt.ToolTip)
+        close_button = IconButton('c', 'delete.png', self.tr('&Close'), self.close)
+        add_button = IconButton('c', 'add.png', self.tr('&Add This Word'), self.addWord)
+        add_button.adjustSize()
+        self.description_browser = QtGui.QTextBrowser()
+        self.description_browser.setFrameShape(QtGui.QFrame.NoFrame)
+
+        layout = QtGui.QGridLayout()
+        layout.setMargin(0)
+        layout.setSpacing(0)
+
+        layout.addWidget(close_button, 0, 0)
+        layout.addWidget(add_button, 0, 1)
+        layout.addWidget(self.description_browser, 1,0,1,2)
+        self.setLayout(layout)
+        self.adjustSize()
+
+    def lookupAndShow(self, word):
+        self.word = word
+        self.description_browser.setText("Lookup...")
+        self.move(QtGui.QCursor().pos().x() - 2, QtGui.QCursor().pos().y() - 2) # <= abs pos
+        self.show()
+        self.description_browser.setHtml(sdcv(word))
+
+    def addWord(self):
+        with open(FLASHCARD_PATH, 'a') as file:
+            file.write(self.word + "\t0\n")
+        self.parentWidget().statusBar().showMessage("New word added!")
+        QtCore.QTimer.singleShot(1000, lambda: self.parentWidget().statusBar().clearMessage())
+        self.close()
+
+        
 class ConfigFile():
     def __init__(self, parent=None):
         if not os.path.isdir(ROOT):
@@ -181,9 +230,11 @@ class MainWindow(QtGui.QMainWindow):
         self.word_label = QtGui.QLabel()
         self.word_label.setAlignment(QtCore.Qt.AlignCenter)
         self.word_label.setStyleSheet("font-size:30px;")
-        
-        self.description_browser = QtGui.QTextBrowser()
+
+        self.description_browser = QtGui.QTextBrowser(self)
         self.description_browser.setStyleSheet("font-size:12pt;")
+        self.description_browser.selectionChanged.connect(self.lookupSelection)
+
         central_widget = QtGui.QWidget()
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.word_label)
@@ -216,6 +267,10 @@ class MainWindow(QtGui.QMainWindow):
         if OPEN_FIRST_TIME_HELP == True:
             self.openHelpWindow()
 
+        # Lookup tooltip
+        self.lookup_tooltip = LookupTooltip(self)
+        self.__selectedText = ""                        
+            
     def refresh(self):
         self.io.checkIfFileUpdated()
         word, count = self.io.getItem(self.index)
@@ -229,21 +284,19 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.word = word
             self.word_label.setText(self.word)
-            cmd = subprocess.Popen(['sdcv', '-n', self.word], stdout=subprocess.PIPE)
-            output = cmd.stdout.read()
-            output = output.decode('utf-8')
-            formattedOut = re.sub(r'(.+)\n', r'\1<br>\n', output)
-            formattedOut = re.sub(r'-->(.+)<br>\n-->(.+)<br>',
-                                  r'''
-<h5 style='background-color:#184880; color:#88bbff; margin:0;'>\1</h5>
-<h3 style='background-color:#184880; color:#fff; margin:0;'>\2</h3>
-                                  '''
-                                  , formattedOut)
-            # print(formattedOut)
-            self.formattedOut = formattedOut
+            self.formattedDescription = sdcv(self.word)
             self.description_browser.setText("")
             self.now = 'unanswered'
         self.refreshStatusBar()
+
+    def lookupSelection(self):
+        cursor = self.description_browser.textCursor()
+        if app.mouseButtons() == QtCore.Qt.NoButton:
+            if cursor.hasSelection() and cursor.selectedText() != self.__selectedText:
+                self.__selectedText = cursor.selectedText()
+                # self is Important! or cannot get global position of
+                # tooltip. I don't know why.
+                self.lookup_tooltip.lookupAndShow(self.__selectedText)
 
     def refreshStatusBar(self):
         wordsTotal = self.io.length()
@@ -252,7 +305,7 @@ class MainWindow(QtGui.QMainWindow):
             self.status_index.setText("{0}/{1}".format(index, wordsTotal))
 
     def showDescription(self):
-        self.description_browser.setHtml(self.formattedOut)
+        self.description_browser.setHtml(self.formattedDescription)
         self.now = 'answered'
 
     def allWordsFinished(self):
