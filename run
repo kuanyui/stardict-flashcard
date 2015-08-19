@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
-sys.path.insert(0, "/usr/share/stardict-flashcard")
-import main
+#sys.path.insert(0, "/usr/share/stardict-flashcard")
+import sf
+sf.run()
